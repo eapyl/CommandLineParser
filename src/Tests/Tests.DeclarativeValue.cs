@@ -9,7 +9,7 @@ namespace Tests
         {
             private bool defaultFalse;
 
-            [ValueArgument(typeof(bool), 'f', DefaultValue = false)]
+            [ValueArgument(typeof(bool), ShortName = 'f', DefaultValue = false)]
             public bool DefaultFalse
             {
                 get { return defaultFalse; }
@@ -25,7 +25,7 @@ namespace Tests
         {
             private bool defaultTrue;
 
-            [ValueArgument(typeof(bool), 't', DefaultValue = true)]
+            [ValueArgument(typeof(bool), ShortName = 't', DefaultValue = true)]
             public bool DefaultTrue
             {
                 get { return defaultTrue; }

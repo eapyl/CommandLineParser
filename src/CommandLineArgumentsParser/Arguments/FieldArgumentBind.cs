@@ -5,7 +5,7 @@ namespace CommandLineParser.Arguments
     /// Bind between object ensures that value of the argument from the command line is copied
     /// to the bound field or property.
     /// </summary>
-    public struct FieldArgumentBind
+    internal struct FieldArgumentBind
     {
         /// <summary>
         /// Bound object

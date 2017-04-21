@@ -40,7 +40,6 @@ namespace CommandLineParser.Validation
     /// Allows to define which arguments can be used together and which combinations
     /// are forbidden for the application.
     /// </summary>
-    /// <include file='..\Doc\CommandLineParser.xml' path='CommandLineParser/Certifications/Certification/*'/>
     public class ArgumentGroupCertification : ArgumentCertification
     {
         /// <summary>
@@ -63,9 +62,9 @@ namespace CommandLineParser.Validation
             Condition = condition;
             if (arguments != null)
                 _argumentGroupString = GetGroupStringFromArguments(_argumentGroup);
-            if (_description == null && _argumentGroupString != null)
+            if (Description == null && _argumentGroupString != null)
             {
-                _description = DefaultUsageDescription();
+                Description = DefaultUsageDescription();
             }
         }
 
@@ -79,9 +78,9 @@ namespace CommandLineParser.Validation
             : this((Argument[])null, condition)
         {
             _argumentGroupString = arguments;
-            if (_description == null)
+            if (Description == null)
             {
-                _description = DefaultUsageDescription();
+                Description = DefaultUsageDescription();
             }
         }
 
@@ -204,25 +203,8 @@ namespace CommandLineParser.Validation
     }
 
     /// <summary>
-    /// Thrown when there is some conflict among the used arguments. 
-    /// </summary>
-    public class ArgumentConflictException : CommandLineException
-    {
-        /// <summary>
-        /// Creates new instance of <see cref="ArgumentConflictException" />
-        /// </summary>
-        /// <param name="message">cause of the exception</param>
-        public ArgumentConflictException(string message)
-            : base(message)
-        {
-
-        }
-    }
-
-    /// <summary>
     /// Use ArgumentGroupCertificationAttribute to define <see cref="ArgumentGroupCertification"/>s declaratively. 
     /// </summary>
-    /// <include file='..\Doc\CommandLineParser.xml' path='CommandLineParser/Certifications/CertificationAttribute/*'/>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
     public class ArgumentGroupCertificationAttribute : ArgumentCertificationAttribute
     {

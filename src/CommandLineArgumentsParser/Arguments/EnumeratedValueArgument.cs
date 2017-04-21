@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CommandLineParser.Compatiblity;
 using CommandLineParser.Exceptions;
-using CommandLineParser.Extensions;
 
 namespace CommandLineParser.Arguments
 {
@@ -11,11 +11,35 @@ namespace CommandLineParser.Arguments
     /// (see <see cref="AllowedValues"/>)
     /// </summary>
     /// <typeparam name="TValue">Type of the value</typeparam>
-    /// <include file='..\Doc\CommandLineParser.xml' path='CommandLineParser/Arguments/EnumeratedValueArgument/*'/>
     public class EnumeratedValueArgument<TValue> : CertifiedValueArgument<TValue>
     {
+        #region property backing fields
+
         private ICollection<TValue> _allowedValues;
+
         private bool _ignoreCase;
+
+        #endregion
+        
+        #region constructor 
+
+        /// <summary>
+        /// Creates new command line argument with a <see cref="Argument.ShortName">short name</see>,
+        /// <see cref="Argument.LongName">long name</see> and <see cref="Argument.Description">description</see>
+        /// </summary>
+        /// <param name="shortName">Short name of the argument</param>
+        /// <param name="longName">Long name of the argument </param>
+        /// <param name="description">Description of the argument</param>
+        /// <param name="allowedValues">Allowed values</param>
+        public EnumeratedValueArgument(char? shortName = null, string longName = null, string description = null, ICollection<TValue> allowedValues = null)
+            : base(shortName, longName, description)
+        {
+            _allowedValues = allowedValues;
+        }
+
+        #endregion
+
+        #region properties 
 
         /// <summary>
         /// Set of values that are allowed for the argument.
@@ -24,23 +48,6 @@ namespace CommandLineParser.Arguments
         {
             get { return _allowedValues; }
             set { _allowedValues = value; }
-        }
-
-        /// <summary>
-        /// Initilazes <see cref="AllowedValues"/> by a string of values separated by commas or semicolons.
-        /// </summary>
-        /// <param name="valuesString">Allowed values (separated by comas or semicolons)</param>
-        public void InitAllowedValues(string valuesString)
-        {
-            string[] splitted = valuesString.Split(';', ',');
-            TValue[] typedValues = new TValue[splitted.Length];
-            int i = 0;
-            foreach (string value in splitted)
-            {
-                typedValues[i] = Convert(value);
-                i++;
-            }
-            AllowedValues = typedValues;
         }
 
         /// <summary>
@@ -59,86 +66,27 @@ namespace CommandLineParser.Arguments
             }
         }
 
-        #region constructor
-
-        /// <summary>
-        /// Creates new command line argument with a <see cref="Argument.ShortName">short name</see>.
-        /// </summary>
-        /// <param name="shortName">Short name of the argument</param>
-        public EnumeratedValueArgument(char shortName)
-            : base(shortName)
-        {
-            _allowedValues = new TValue[0];
-        }
-
-        /// <summary>
-        /// Creates new command line argument with a <see cref="Argument.LongName">long name</see>.
-        /// </summary>
-        /// <param name="longName">Long name of the argument</param>
-        public EnumeratedValueArgument(string longName) : base(longName) { }
-
-        /// <summary>
-        /// Creates new command line argument with a <see cref="Argument.ShortName">short name</see>
-        /// and <see cref="Argument.LongName">long name</see>.
-        /// </summary>
-        /// <param name="shortName">Short name of the argument</param>
-        /// <param name="longName">Long name of the argument </param>
-        public EnumeratedValueArgument(char shortName, string longName)
-            : base(shortName, longName)
-        {
-            _allowedValues = new TValue[0];
-        }
-
-        /// <summary>
-        /// Creates new command line argument with a <see cref="Argument.ShortName">short name</see>.
-        /// </summary>
-        /// <param name="shortName">Short name of the argument</param>
-        /// <param name="allowedValues">Allowed values</param>
-        public EnumeratedValueArgument(char shortName, ICollection<TValue> allowedValues)
-            : base(shortName)
-        {
-            _allowedValues = allowedValues;
-        }
-
-        /// <summary>
-        /// Creates new command line argument with a <see cref="Argument.LongName">long name</see>.
-        /// </summary>
-        /// <param name="longName">Short name of the argument</param>
-        /// <param name="allowedValues">Allowed values</param>
-        public EnumeratedValueArgument(string longName, ICollection<TValue> allowedValues)
-            : base(longName)
-        {
-            _allowedValues = allowedValues;
-        }
-
-        /// <summary>
-        /// Creates new command line argument with a <see cref="Argument.ShortName">short name</see>
-        /// and <see cref="Argument.LongName">long name</see>.
-        /// </summary>
-        /// <param name="shortName">Short name of the argument</param>
-        /// <param name="longName">Long name of the argument </param>
-        /// <param name="allowedValues">Allowed values</param>
-        public EnumeratedValueArgument(char shortName, string longName, ICollection<TValue> allowedValues)
-            : base(shortName, longName)
-        {
-            _allowedValues = allowedValues;
-        }
-
-        /// <summary>
-        /// Creates new command line argument with a <see cref="Argument.ShortName">short name</see>,
-        /// <see cref="Argument.LongName">long name</see> and <see cref="Argument.Description">description</see>
-        /// </summary>
-        /// <param name="shortName">Short name of the argument</param>
-        /// <param name="longName">Long name of the argument </param>
-        /// <param name="description">Description of the argument</param>
-        /// <param name="allowedValues">Allowed values</param>
-        public EnumeratedValueArgument(char shortName, string longName, string description, ICollection<TValue> allowedValues)
-            : base(shortName, longName, description)
-        {
-            _allowedValues = allowedValues;
-        }
-
         #endregion
+
+        #region methods
+
+        /// <summary>
+        /// Initilazes <see cref="AllowedValues"/> by a string of values separated by commas or semicolons.
+        /// </summary>
+        /// <param name="valuesString">Allowed values (separated by comas or semicolons)</param>
+        public void InitAllowedValues(string valuesString)
+        {
+            string[] splitted = valuesString.Split(';', ',');
+            TValue[] typedValues = new TValue[splitted.Length];
+            int i = 0;
+            foreach (string value in splitted)
+            {
+                typedValues[i] = Convert(value);
+                i++;
+            }
+            AllowedValues = typedValues;
+        }
+
 
         /// <summary>
         /// Checks whether the specified value belongs to 
@@ -163,10 +111,12 @@ namespace CommandLineParser.Arguments
                 ok = _allowedValues.Contains(value);
             }
             if (!ok)
-                throw new CommandLineArgumentOutOfRangeException(String.Format(
-                                                                     Messages.EXC_ARG_ENUM_OUT_OF_RANGE, Value,
-                                                                     Name), Name);
+            {
+                throw new CommandLineArgumentOutOfRangeException(String.Format(Messages.EXC_ARG_ENUM_OUT_OF_RANGE, Value, Name), Name);
+            }
         }
+
+        #endregion
     }
 
     /// <summary>
@@ -183,72 +133,19 @@ namespace CommandLineParser.Arguments
     /// <remarks>Use <see cref="CommandLineParser.ExtractArgumentAttributes"/> for each object 
     /// you where you have delcared argument attributes.</remarks>
     public sealed class EnumeratedValueArgumentAttribute : ArgumentAttribute
-    {
-        private readonly Type _argumentType;
-
-        /// <summary>
-        /// Creates proper generic <see cref="BoundedValueArgument{TValue}"/> type for <paramref name="type"/>.
-        /// </summary>
-        /// <param name="type">type of the argument value</param>
-        /// <returns>generic type</returns>
-        private static Type CreateProperValueArgumentType(Type type)
-        {
-            Type genericType = typeof(EnumeratedValueArgument<>);
-            Type constructedType = genericType.MakeGenericType(type);
-            return constructedType;
-        }
-
-        /// <summary>
-		/// Creates new instance of EnumeratedValueArgumentAttribute. EnumeratedValueArgument
-		/// uses underlying <see cref="EnumeratedValueArgument{TValue}"/>.
-        /// </summary>
-        /// <param name="type">Type of the generic parameter of <see cref="EnumeratedValueArgument{TValue}"/>.</param>
-        /// <param name="shortName"><see cref="Argument.ShortName">short name</see> of the underlying argument</param>
-        /// <remarks>
-        /// Parameter <paramref name="type"/> has to be either built-in 
-        /// type or has to define a static Parse(String, CultureInfo) 
-        /// method for reading the value from string.
-        /// </remarks>
-        public EnumeratedValueArgumentAttribute(Type type, char shortName)
-            : base(CreateProperValueArgumentType(type), shortName)
-        {
-            _argumentType = CreateProperValueArgumentType(type);
-        }
-
-        /// <summary>
-		/// Creates new instance of EnumeratedValueArgumentAttribute. EnumeratedValueArgument
-		/// uses underlying <see cref="EnumeratedValueArgument{TValue}"/>.
-        /// </summary>
-        /// <param name="type">Type of the generic parameter of <see cref="EnumeratedValueArgument{TValue}"/>.</param>
-        /// <param name="longName"><see cref="Argument.LongName">short name</see> of the underlying argument</param>
-        /// <remarks>
-        /// Parameter <paramref name="type"/> has to be either built-in 
-        /// type or has to define a static Parse(String, CultureInfo) 
-        /// method for reading the value from string.
-        /// </remarks>
-        public EnumeratedValueArgumentAttribute(Type type, string longName)
-            : base(CreateProperValueArgumentType(type), longName)
-        {
-            _argumentType = CreateProperValueArgumentType(type);
-        }
-
+    {                
         /// <summary>
 		/// Creates new instance of EnumeratedValueArgument. EnumeratedValueArgument
 		/// uses underlying <see cref="EnumeratedValueArgument{TValue}"/>.
         /// </summary>
 		/// <param name="type">Type of the generic parameter of <see cref="EnumeratedValueArgument{TValue}"/>.</param>
-        /// <param name="shortName"><see cref="Argument.ShortName">short name</see> of the underlying argument</param>
-        /// <param name="longName"><see cref="Argument.LongName">long name</see> of the underlying argument</param>
         /// <remarks>
         /// Parameter <paramref name="type"/> has to be either built-in 
         /// type or has to define a static Parse(String, CultureInfo) 
         /// method for reading the value from string.
         /// </remarks>
-        public EnumeratedValueArgumentAttribute(Type type, char shortName, string longName)
-            : base(CreateProperValueArgumentType(type), shortName, longName)
-        {
-            _argumentType = CreateProperValueArgumentType(type);
-        }
+        public EnumeratedValueArgumentAttribute(Type type)
+            : base(typeof(EnumeratedValueArgument<>).MakeGenericType(type)) { }
 
         /// <summary>
         /// Allowed values of the argument, separated by commas or semicolons.
@@ -261,7 +158,7 @@ namespace CommandLineParser.Arguments
             }
             set
             {
-                _argumentType.InvokeMethod("InitAllowedValues", Argument, value);
+                _underlyingArgumentType.InvokeMethod("InitAllowedValues", Argument, value);
             }
         }
 
@@ -272,11 +169,11 @@ namespace CommandLineParser.Arguments
         {
             get
             {
-                return _argumentType.GetPropertyValue<object>("DefaultValue", Argument);
+                return _underlyingArgumentType.GetPropertyValue<object>("DefaultValue", Argument);
             }
             set
             {
-                _argumentType.SetPropertyValue("DefaultValue", Argument, value);
+                _underlyingArgumentType.SetPropertyValue("DefaultValue", Argument, value);
             }
         }
 
@@ -292,11 +189,11 @@ namespace CommandLineParser.Arguments
         {
             get
             {
-                return _argumentType.GetPropertyValue<bool>("ValueOptional", Argument);
+                return _underlyingArgumentType.GetPropertyValue<bool>("ValueOptional", Argument);
             }
             set
             {
-                _argumentType.SetPropertyValue("ValueOptional", Argument, value);
+                _underlyingArgumentType.SetPropertyValue("ValueOptional", Argument, value);
             }
         }
 
@@ -307,11 +204,11 @@ namespace CommandLineParser.Arguments
         {
             get
             {
-                return _argumentType.GetPropertyValue<bool>("IgnoreCase", Argument);
+                return _underlyingArgumentType.GetPropertyValue<bool>("IgnoreCase", Argument);
             }
             set
             {
-                _argumentType.SetPropertyValue("IgnoreCase", Argument, value);
+                _underlyingArgumentType.SetPropertyValue("IgnoreCase", Argument, value);
             }
         }
     }

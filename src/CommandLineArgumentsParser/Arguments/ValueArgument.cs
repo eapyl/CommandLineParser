@@ -3,8 +3,8 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using CommandLineParser.Compatiblity;
 using CommandLineParser.Exceptions;
-using CommandLineParser.Extensions;
 
 namespace CommandLineParser.Arguments
 {
@@ -22,7 +22,6 @@ namespace CommandLineParser.Arguments
     /// <typeparam name="TValue">type of the value of the argument. 
     /// Can be either builtin type or any user type (for which specific
     /// conversion routine is provided - <see cref="ConvertValueHandler"/></typeparam>
-    /// <include file='..\Doc\CommandLineParser.xml' path='CommandLineParser/Arguments/ValueArgument/*'/>
     public class ValueArgument<TValue> : Argument, IValueArgument, IArgumentWithDefaultValue
     {
         #region property backing fields
@@ -33,31 +32,10 @@ namespace CommandLineParser.Arguments
 
         private readonly List<TValue> _values = new List<TValue>();
 
-        private CultureInfo _cultureInfo = CultureInfo.InvariantCulture;
-
         #endregion
 
         #region constructor
-
-        /// <summary>
-        /// Creates new value argument with a <see cref="Argument.ShortName">short name</see>.
-        /// </summary>
-        /// <param name="shortName">Short name of the argument</param>
-        public ValueArgument(char shortName) : base(shortName) { }
-
-        /// <summary>
-        /// Creates new value argument with a <see cref="Argument.LongName">long name</see>.
-        /// </summary>
-        /// <param name="longName">Long name of the argument</param>
-        public ValueArgument(string longName) : base(longName) { }
-
-        /// <summary>
-        /// Creates new value argument with a <see cref="Argument.ShortName">short name</see>and <see cref="Argument.LongName">long name</see>.
-        /// </summary>
-        /// <param name="shortName">Short name of the argument</param>
-        /// <param name="longName">Long name of the argument </param>
-        public ValueArgument(char shortName, string longName) : base(shortName, longName) { }
-
+        
         /// <summary>
         /// Creates new value argument with a <see cref="Argument.ShortName">short name</see>,
         /// <see cref="Argument.LongName">long name</see> and <see cref="Argument.Description">description</see>.
@@ -65,26 +43,19 @@ namespace CommandLineParser.Arguments
         /// <param name="shortName">Short name of the argument</param>
         /// <param name="longName">Long name of the argument </param>
         /// <param name="description">description of the argument</param>
-        public ValueArgument(char shortName, string longName, string description)
+        public ValueArgument(char? shortName = null, string longName = null, string description = null)
             : base(shortName, longName, description) { }
 
         #endregion
+
+        #region properties 
 
         /// <summary>
         /// String read from command line as arguments <see cref="Value"/>. Available after <see cref="Parse"/> is called. 
         /// </summary>
         /// <exception cref="InvalidOperationException">String value was read before ParseCommandLine was called or when</exception>
-        public string StringValue
-        {
-            get
-            {
-                if (Parsed)
-                    return _stringValue;
-                else
-                    return null;
-            }
-        }
-
+        public string StringValue => Parsed? _stringValue : null;
+        
         /// <summary>
         /// Value of the ValueArgument, for arguments with single value.
         /// Can be used only if <see cref="Argument.AllowMultiple"/> is set to false.
@@ -110,7 +81,10 @@ namespace CommandLineParser.Arguments
         /// </summary>
         public TValue DefaultValue { get; set; }
 
-        object IArgumentWithDefaultValue.DefaultValue { get { return DefaultValue; } }
+        /// <summary>
+        /// Default value of the argument.
+        /// </summary>
+        object IArgumentWithDefaultValue.DefaultValue => DefaultValue;
 
         /// <summary>
         /// When set to true, argument can appear on the command line with or without value, e.g. both is allowed: 
@@ -147,6 +121,10 @@ namespace CommandLineParser.Arguments
             set { Value = (TValue)value; }
         }
 
+        /// <summary>
+        /// Values of the ValueArgument - for arguments with multiple values allowed. 
+        /// Can be used only if <see cref="Argument.AllowMultiple"/> is set to true.
+        /// </summary>
         IList<object> IValueArgument.Values
         {
             get
@@ -161,18 +139,28 @@ namespace CommandLineParser.Arguments
         }
 
         /// <summary>
+        /// Function that converts string to <typeparamref name="TValue"/> type.
+        /// Necessary when non-builtin type is used as <typeparamref name="TValue"/>.
+        /// </summary>
+        public ConvertValueDelegate<TValue> ConvertValueHandler { get; set; }
+
+        /// <summary>
+        /// Culture used for conversions of built-in types. InvariantCulture is used when 
+        /// no other culture is specified. 
+        /// </summary>
+        public CultureInfo CultureInfo { get; set; } = CultureInfo.InvariantCulture;
+        
+        #endregion
+
+        #region methods
+
+        /// <summary>
         /// Adds an item to underlying <see cref="Values"/> collection.
         /// </summary>
         public void AddToValues(object value)
         {
             Values.Add((TValue)value);
         }
-
-        /// <summary>
-        /// Function that converts string to <typeparamref name="TValue"/> type.
-        /// Necessary when non-builtin type is used as <typeparamref name="TValue"/>.
-        /// </summary>
-        public ConvertValueDelegate<TValue> ConvertValueHandler { get; set; }
 
         /// <summary>
         /// This method reads the argument and the following string representing the value of the argument. 
@@ -303,17 +291,7 @@ namespace CommandLineParser.Arguments
             targetCollection.Clear();
             return targetCollection;
         }
-
-        /// <summary>
-        /// Culture used for conversions of built-in types. InvariantCulture is used when 
-        /// no other culture is specified. 
-        /// </summary>
-        public CultureInfo CultureInfo
-        {
-            get { return _cultureInfo; }
-            set { _cultureInfo = value; }
-        }
-
+        
         /// <summary>
         /// Converts <paramref name="stringValue"/> to <typeparamref name="TValue"/>.
         /// <see cref="ConvertValueHandler"/> is called if specified, otherwise
@@ -440,6 +418,8 @@ namespace CommandLineParser.Arguments
                 Console.WriteLine(Messages.EXC_ARG_VALUE_PRINT_MULTIPLE, Name, Values.Count, valuesString, typeof(TValue).Name);
             }
         }
+
+        #endregion 
     }
 
     /// <summary>
@@ -456,64 +436,19 @@ namespace CommandLineParser.Arguments
     /// <remarks>Use <see cref="CommandLineParser.ExtractArgumentAttributes"/> for each object 
     /// you where you have delcared argument attributes.</remarks>
     public class ValueArgumentAttribute : ArgumentAttribute
-    {
-        private static Type underlyingValueArgument;
-
-        /// <summary>
-        /// Creates proper generic <see cref="ValueArgument{TValue}"/> type for <paramref name="type"/>.
-        /// </summary>
-        /// <param name="type">type of the argument value</param>
-        /// <returns>generic type</returns>
-        private static Type CreateProperValueArgumentType(Type type)
-        {
-            Type genericType = typeof(ValueArgument<>);
-            Type constructedType = genericType.MakeGenericType(type);
-            underlyingValueArgument = constructedType;
-            return underlyingValueArgument;
-        }
-
-        /// <summary>
-        /// Creates new instance of ValueArgument. ValueArgument
-        /// uses underlying <see cref="ValueArgument{TValue}"/>.
-        /// </summary>
-        /// <param name="type">Type of the generic parameter of <see cref="ValueArgument{TValue}"/>. </param>
-        /// <param name="shortName"><see cref="Argument.ShortName">short name</see> of the underlying argument</param>
-        /// <remarks>
-        /// Parameter <paramref name="type"/> has to be either built-in 
-        /// type or has to define a static Parse(String, CultureInfo) 
-        /// method for reading the value from string.
-        /// </remarks>
-        public ValueArgumentAttribute(Type type, char shortName)
-            : base(CreateProperValueArgumentType(type), shortName) { }
-
-        /// <summary>
-        /// Creates new instance of ValueArgument. ValueArgument
-        /// uses underlying <see cref="ValueArgument{TValue}"/>.
-        /// </summary>
-        /// <param name="type">Type of the generic parameter of <see cref="ValueArgument{TValue}"/>. </param>
-        /// <param name="longName"><see cref="Argument.LongName">long name</see> of the underlying argument</param>
-        /// <remarks>
-        /// Parameter <paramref name="type"/> has to be either built-in 
-        /// type or has to define a static Parse(String, CultureInfo) 
-        /// method for reading the value from string.
-        /// </remarks>
-        public ValueArgumentAttribute(Type type, string longName)
-            : base(CreateProperValueArgumentType(type), longName) { }
-
+    {        
         /// <summary>
         /// Creates new instance of ValueArgument. ValueArgument
         /// uses underlying <see cref="ValueArgument{TValue}"/>.
         /// </summary>
         /// <param name="type">Type of the generic parameter of <see cref="ValueArgument{TValue}"/>.</param>
-        /// <param name="shortName"><see cref="Argument.ShortName">short name</see> of the underlying argument</param>
-        /// <param name="longName"><see cref="Argument.LongName">long name</see> of the underlying argument</param>
         /// <remarks>
         /// Parameter <paramref name="type"/> has to be either built-in 
         /// type or has to define a static Parse(String, CultureInfo) 
         /// method for reading the value from string.
         /// </remarks>
-        public ValueArgumentAttribute(Type type, char shortName, string longName)
-            : base(CreateProperValueArgumentType(type), shortName, longName) { }
+        public ValueArgumentAttribute(Type type)
+            : base(typeof(ValueArgument<>).MakeGenericType(type)) { }
 
         /// <summary>
         /// Default value

@@ -7,7 +7,6 @@ namespace CommandLineParser.Validation
     /// <summary>
     /// Allows to define which two groups of arguments that can not be used together.
     /// </summary>
-    /// <include file='..\Doc\CommandLineParser.xml' path='CommandLineParser/Certifications/Certification/*'/>
     public class DistinctGroupsCertification : ArgumentCertification
     {
         private Argument[] _argumentGroup1;
@@ -31,9 +30,9 @@ namespace CommandLineParser.Validation
 
             _argumentGroupString1 = ArgumentGroupCertification.GetGroupStringFromArguments(argumentGroup1);
             _argumentGroupString2 = ArgumentGroupCertification.GetGroupStringFromArguments(argumentGroup2);
-            if (_description == null)
+            if (Description == null)
             {
-                _description = DefaultUsageDescription();
+                Description = DefaultUsageDescription();
             }
         }
 
@@ -49,9 +48,9 @@ namespace CommandLineParser.Validation
         {
             _argumentGroupString1 = argumentGroup1;
             _argumentGroupString2 = argumentGroup2;
-            if (_description == null)
+            if (Description == null)
             {
-                _description = DefaultUsageDescription();
+                Description = DefaultUsageDescription();
             }
         }
 
@@ -106,7 +105,6 @@ namespace CommandLineParser.Validation
     /// <summary>
     /// Use DistinctGroupsCertificationAttribute to define <see cref="DistinctGroupsCertification"/>s declaratively. 
     /// </summary>
-	/// <include file='..\Doc\CommandLineParser.xml' path='CommandLineParser/Certifications/CertificationAttribute/*'/>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
     public class DistinctGroupsCertificationAttribute : ArgumentCertificationAttribute
     {

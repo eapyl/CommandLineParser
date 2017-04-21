@@ -10,7 +10,7 @@ namespace Tests
     {
         class RegexValueArgumentParsingTarget
         {
-            [RegexValueArgument('c', "\\d[A-Z]\\d")]
+            [RegexValueArgument("\\d[A-Z]\\d", ShortName = 'c')]
             public string Code { get; set; }
         }
 

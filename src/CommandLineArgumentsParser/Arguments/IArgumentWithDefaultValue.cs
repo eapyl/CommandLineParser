@@ -9,9 +9,9 @@ namespace CommandLineParser.Arguments
     /// </summary>
     public interface IArgumentWithDefaultValue
     {
-        ///<summary>
+        /// <summary>
         /// Default value of the argument.
-        ///</summary>
+        /// </summary>
         object DefaultValue { get; }
     }
 }

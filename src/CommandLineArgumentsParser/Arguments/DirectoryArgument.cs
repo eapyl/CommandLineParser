@@ -7,67 +7,43 @@ namespace CommandLineParser.Arguments
 	/// </summary>
 	public class DirectoryArgument: CertifiedValueArgument<DirectoryInfo>
 	{
-		#region constructor
+        #region constructor
 
-		/// <summary>
-		/// Creates new certified value argument with a <see cref="Argument.ShortName">short name</see>.
-		/// </summary>
-		/// <param name="shortName">Short name of the argument</param>
-		public DirectoryArgument(char shortName) : base(shortName) { }
-
-	    /// <summary>
-	    /// Creates new certified value argument with a <see cref="Argument.LongName">long name</see>.
-	    /// </summary>
-	    /// <param name="longName">Long name of the argument</param>
-	    public DirectoryArgument(string longName) : base(longName) { }
-
-	    /// <summary>
-		/// Creates new certified value argument with a <see cref="Argument.ShortName">short name</see>and <see cref="Argument.LongName">long name</see>.
-		/// </summary>
-		/// <param name="shortName">Short name of the argument</param>
-		/// <param name="longName">Long name of the argument </param>
-		public DirectoryArgument(char shortName, string longName) : base(shortName, longName) { }
-
-	    /// <summary>
+        /// <summary>
         /// Creates new certified value argument with a <see cref="Argument.ShortName">short name</see>,
         /// <see cref="Argument.LongName">long name</see> and <see cref="Argument.Description">description</see>
         /// </summary>
         /// <param name="shortName">Short name of the argument</param>
         /// <param name="longName">Long name of the argument </param>
         /// <param name="description">description of the argument</param>
-        public DirectoryArgument(char shortName, string longName, string description) : base(shortName, longName, description) { }
-		#endregion 
-	
-		private bool _directoryMustExist = true;
+        public DirectoryArgument(char? shortName = null, string longName = null, string description = null) : base(shortName, longName, description) { }
 
-		/// <summary>
-		/// Gets or sets a value indicating whether the directory must
-		/// already exists in the file system or not .
-		/// Default is true.
-		/// </summary>
-		public bool DirectoryMustExist
-		{
-			get { return _directoryMustExist; }
-			set { _directoryMustExist = value; }
-		}
+        #endregion
 
-		/// <summary>
-		/// DirectoryInfo for the directory passed as argument.
-		/// </summary>
-		public DirectoryInfo DirectoryInfo
-		{
-			get
-			{
-				return Value;
-			}
-		}
+        #region properties
 
-		/// <summary>
-		/// Converts <paramref name="stringValue"/> to <see cref="DirectoryInfo"/>
-		/// </summary>
-		/// <param name="stringValue">string representing the value</param>
-		/// <returns>value as <see cref="DirectoryInfo"/></returns>
-		public override DirectoryInfo Convert(string stringValue)
+        /// <summary>
+        /// Gets or sets a value indicating whether the directory must
+        /// already exists in the file system or not .
+        /// Default is true.
+        /// </summary>
+        public bool DirectoryMustExist { get; set; } = true;
+
+        /// <summary>
+        /// DirectoryInfo for the directory passed as argument.
+        /// </summary>
+        public DirectoryInfo DirectoryInfo => Value;
+
+        #endregion
+
+        #region methods
+
+        /// <summary>
+        /// Converts <paramref name="stringValue"/> to <see cref="DirectoryInfo"/>
+        /// </summary>
+        /// <param name="stringValue">string representing the value</param>
+        /// <returns>value as <see cref="DirectoryInfo"/></returns>
+        public override DirectoryInfo Convert(string stringValue)
 		{
 			return new DirectoryInfo(stringValue);
 		}
@@ -83,7 +59,9 @@ namespace CommandLineParser.Arguments
 				throw new DirectoryNotFoundException(string.Format(Messages.EXC_DIR_NOT_FOUND, value.Name));
 			}
 		}
-	}
+
+        #endregion 
+    }
 
 	/// <summary>
 	/// <para>
@@ -104,23 +82,7 @@ namespace CommandLineParser.Arguments
 		/// Creates new instance of DirectoryArgumentAttribute. DirectoryArgumentAttribute
 		/// uses underlying <see cref="DirectoryArgument"/>.
 		/// </summary>
-		/// <param name="shortName"><see cref="Argument.ShortName">short name</see> of the underlying argument</param>
-		public DirectoryArgumentAttribute(char shortName) : base(typeof(DirectoryArgument), shortName) { }
-
-        /// <summary>
-        /// Creates new instance of DirectoryArgumentAttribute. DirectoryArgumentAttribute
-        /// uses underlying <see cref="DirectoryArgument"/>.
-        /// </summary>
-        /// <param name="longName"><see cref="Argument.LongName">short name</see> of the underlying argument</param>
-        public DirectoryArgumentAttribute(string longName) : base(typeof(DirectoryArgument), longName) { }
-
-		/// <summary>
-		/// Creates new instance of DirectoryArgumentAttribute. DirectoryArgumentAttribute
-		/// uses underlying <see cref="DirectoryArgument"/>.
-		/// </summary>
-		/// <param name="shortName"><see cref="Argument.ShortName">short name</see> of the underlying argument</param>
-		/// <param name="longName"><see cref="Argument.LongName">long name</see> of the underlying argument</param>
-		public DirectoryArgumentAttribute(char shortName, string longName) : base(typeof(DirectoryArgument), shortName, longName) { }
+		public DirectoryArgumentAttribute() : base(typeof(DirectoryArgument)) { }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether the directory must

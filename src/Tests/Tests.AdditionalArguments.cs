@@ -9,9 +9,10 @@ namespace Tests
     {
         public CommandLineParser.CommandLineParser InitAdditionalArguments()
         {
-            var commandLineParser = new CommandLineParser.CommandLineParser();
-            commandLineParser.ShowUsageOnEmptyCommandline = true;
-
+            var commandLineParser = new CommandLineParser.CommandLineParser()
+            {
+                ShowUsageOnEmptyCommandline = true
+            };
             SwitchArgument showArgument = new SwitchArgument('s', "show", "Set whether show or not", true);
 
             SwitchArgument hideArgument = new SwitchArgument('h', "hide", "Set whether hid or not", false);
@@ -22,26 +23,32 @@ namespace Tests
 
             ValueArgument<Point> point = new ValueArgument<Point>('p', "point", "specify the point");
 
-            BoundedValueArgument<int> optimization = new BoundedValueArgument<int>('o', "optimization", 0, 3);
+            BoundedValueArgument<int> optimization = new BoundedValueArgument<int>('o', "optimization", minValue: 0, maxValue: 3);
 
-            EnumeratedValueArgument<string> color = new EnumeratedValueArgument<string>('c', "color", new[] {"red", "green", "blue"});
+            EnumeratedValueArgument<string> color = new EnumeratedValueArgument<string>('c', "color", allowedValues: new[] {"red", "green", "blue"});
 
-            FileArgument inputFile = new FileArgument('i', "input", "Input file");
-            inputFile.FileMustExist = false;
-            FileArgument outputFile = new FileArgument('x', "output", "Output file");
-            outputFile.FileMustExist = false;
-
-            DirectoryArgument inputDirectory = new DirectoryArgument('d', "directory", "Input directory");
-            inputDirectory.DirectoryMustExist = false;
-
+            FileArgument inputFile = new FileArgument('i', "input", "Input file")
+            {
+                FileMustExist = false
+            };
+            FileArgument outputFile = new FileArgument('x', "output", "Output file")
+            {
+                FileMustExist = false
+            };
+            DirectoryArgument inputDirectory = new DirectoryArgument('d', "directory", "Input directory")
+            {
+                DirectoryMustExist = false
+            };
             point.ConvertValueHandler = delegate(string stringValue)
             {
                 if (stringValue.StartsWith("[") && stringValue.EndsWith("]"))
                 {
                     string[] parts =stringValue.Substring(1, stringValue.Length - 2).Split(';', ',');
-                    Point p = new Point();
-                    p.x = int.Parse(parts[0]);
-                    p.y = int.Parse(parts[1]);
+                    Point p = new Point()
+                    {
+                        x = int.Parse(parts[0]),
+                        y = int.Parse(parts[1])
+                    };
                     return p;
                 }
 
@@ -65,13 +72,16 @@ namespace Tests
 			 * certain type (1 file in this case)
 			 * 
 			 */
-            FileArgument additionalFileArgument1 = new FileArgument('_');
-            additionalFileArgument1.FileMustExist = false;
-            additionalFileArgument1.Optional = false;
-            FileArgument additionalFileArgument2 = new FileArgument('_');
-            additionalFileArgument2.FileMustExist = false;
-            additionalFileArgument2.Optional = false;
-
+            FileArgument additionalFileArgument1 = new FileArgument('_')
+            {
+                FileMustExist = false,
+                Optional = false
+            };
+            FileArgument additionalFileArgument2 = new FileArgument('_')
+            {
+                FileMustExist = false,
+                Optional = false
+            };
             commandLineParser.AdditionalArgumentsSettings.TypedAdditionalArguments.Add(additionalFileArgument1);
             commandLineParser.AdditionalArgumentsSettings.TypedAdditionalArguments.Add(additionalFileArgument2);
 

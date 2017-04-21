@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using CommandLineParser.Arguments;
+using CommandLineParser.Compatiblity;
 using CommandLineParser.Exceptions;
 using CommandLineParser.Validation;
 using CommandLineParser.Extensions;
@@ -15,53 +16,37 @@ namespace CommandLineParser
     /// CommandLineParser allows user to define command line arguments and then parse
     /// the arguments from the command line.
     /// </summary>
-    /// <include file='Doc/CommandLineParser.xml' path='CommandLineParser/Parser/*' />
-    public class CommandLineParser : IDisposable
+    public class CommandLineParser
     {
-        #region property backing fields
+        #region fields
 
-        private List<Argument> _arguments = new List<Argument>();
+        private readonly OutputFormatter _outputFormatter;
 
-        private List<ArgumentCertification> _certifications = new List<ArgumentCertification>();
-
-        private Dictionary<char, Argument> _shortNameLookup;
-
-        private Dictionary<string, Argument> _longNameLookup;
+        private Dictionary<string, Argument> _lookupDictionary;
 
         readonly Dictionary<string, Argument> _ignoreCaseLookupDirectory = new Dictionary<string, Argument>();
 
-        private string[] _argsNotParsed;
+        internal string[] _argsNotParsed;
 
-        private bool _checkMandatoryArguments = true;
-
-        private bool _checkArgumentCertifications = true;
-
-        private bool _allowShortSwitchGrouping = true;
-
-        private readonly AdditionalArgumentsSettings _additionalArgumentsSettings = new AdditionalArgumentsSettings();
-
-        private readonly List<string> _showUsageCommands = new List<string> { "--help", "/?", "/help" };
-
-        private bool _acceptSlash = true;
-
-        private bool _acceptHyphen = true;
-
-        private bool _ignoreCase;
-
-        private char[] equalsSignSyntaxValuesSeparators = new char[] { ',', ';' };
-
-        private static Regex lettersOnly = new Regex("^[a-zA-Z]$");
+        private static readonly Regex lettersOnly = new Regex("^[a-zA-Z]$");
 
         #endregion
+
+        #region constructor 
+
+        public CommandLineParser()
+        {
+            _outputFormatter = new OutputFormatter(this);
+        }
+
+        #endregion
+
+        #region properties 
 
         /// <summary>
         /// Defined command line arguments
         /// </summary>
-        public List<Argument> Arguments
-        {
-            get { return _arguments; }
-            set { _arguments = value; }
-        }
+        public List<Argument> Arguments { get; set; } = new List<Argument>();
 
         /// <summary>
         /// Set of <see cref="ArgumentCertification">certifications</see> - certifications can be used to define 
@@ -71,20 +56,13 @@ namespace CommandLineParser
         /// <seealso cref="ArgumentCertification"/>
         /// <seealso cref="ArgumentGroupCertification"/>
         /// <seealso cref="DistinctGroupsCertification"/>
-        public List<ArgumentCertification> Certifications
-        {
-            get { return _certifications; }
-            set { _certifications = value; }
-        }
+        public List<ArgumentCertification> Certifications { get; set; } = new List<ArgumentCertification>();
 
         /// <summary>
         /// Allows more specific definition of additional arguments 
         /// (arguments after those with - and -- prefix).
         /// </summary>
-        public AdditionalArgumentsSettings AdditionalArgumentsSettings
-        {
-            get { return _additionalArgumentsSettings; }
-        }
+        public AdditionalArgumentsSettings AdditionalArgumentsSettings { get; } = new AdditionalArgumentsSettings();
 
         /// <summary>
         /// Text printed in the beginning of 'show usage'
@@ -99,13 +77,7 @@ namespace CommandLineParser
         /// <summary>
         /// Arguments that directly invoke <see cref="ShowUsage()"/>. By default this is --help and /?.
         /// </summary>
-        public IList<string> ShowUsageCommands
-        {
-            get
-            {
-                return _showUsageCommands;
-            }
-        }
+        public IList<string> ShowUsageCommands { get; set; } = new List<string> { "--help", "/?", "/help" };
 
         /// <summary>
         /// When set to true, usage help is printed on the console when command line is without arguments.
@@ -118,58 +90,34 @@ namespace CommandLineParser
         /// is not found on the command line. Default is true.
         /// See: <see cref="Argument.Optional"/>
         /// </summary>
-        public bool CheckMandatoryArguments
-        {
-            get { return _checkMandatoryArguments; }
-            set { _checkMandatoryArguments = value; }
-        }
+        public bool CheckMandatoryArguments { get; set; } = true;
 
         /// <summary>
         /// When set to true, arguments are certified (using set of <see cref="Certifications"/>) after parsing. 
         /// Default is true.
         /// </summary>
-        public bool CheckArgumentCertifications
-        {
-            get { return _checkArgumentCertifications; }
-            set { _checkArgumentCertifications = value; }
-        }
+        public bool CheckArgumentCertifications { get; set; } = true;
 
         /// <summary>
         /// When set to true (default) <see cref="SwitchArgument">switch arguments</see> can be grouped on the command line. 
         /// (e.g. -a -b -c can be written as -abc). When set to false and such a group is found, <see cref="CommandLineFormatException"/> is thrown.
         /// </summary>
-        public bool AllowShortSwitchGrouping
-        {
-            get { return _allowShortSwitchGrouping; }
-            set { _allowShortSwitchGrouping = value; }
-        }
+        public bool AllowShortSwitchGrouping { get; set; } = true;
 
         /// <summary>
         /// Allows arguments in /a and /arg format
         /// </summary>
-        public bool AcceptSlash
-        {
-            get { return _acceptSlash; }
-            set { _acceptSlash = value; }
-        }
+        public bool AcceptSlash { get; set; } = true;
 
         /// <summary>
         /// Allows arguments in -a and --arg format
         /// </summary>
-        public bool AcceptHyphen
-        {
-            get { return _acceptHyphen; }
-            set { _acceptHyphen = value; }
-        }
+        public bool AcceptHyphen { get; set; } = true;
 
         /// <summary>
         /// Argument names case insensitive (--OUTPUT or --output are treated equally)
         /// </summary>
-        public bool IgnoreCase
-        {
-            get { return _ignoreCase; }
-            set { _ignoreCase = value; }
-        }
+        public bool IgnoreCase { get; set; }
 
         /// <summary>
         /// When set to true, values of <see cref="ValueArgument{TValue}"/> are separeted by space, 
@@ -182,60 +130,41 @@ namespace CommandLineParser
 
         public bool PreserveValueQuotesForEqualsSignSyntax { get; set; }
 
-        public char[] EqualsSignSyntaxValuesSeparators
-        {
-            get
-            {
-                return equalsSignSyntaxValuesSeparators;
-            }
-
-            set
-            {
-                equalsSignSyntaxValuesSeparators = value;
-            }
-        }
+        public char[] EqualsSignSyntaxValuesSeparators { get; set; } = { ',', ';' };
 
         /// <summary>
         /// Value is set to true after parsing finishes successfuly 
         /// </summary>
         public bool ParsingSucceeded { get; private set; }
 
+        #endregion 
+
         /// <summary>
         /// Fills lookup dictionaries with arguments names and aliases 
         /// </summary>
         private void InitializeArgumentLookupDictionaries()
         {
-            _shortNameLookup = new Dictionary<char, Argument>();
-            _longNameLookup = new Dictionary<string, Argument>();
-            foreach (Argument argument in _arguments)
+            _lookupDictionary = new Dictionary<string, Argument>();
+            foreach (Argument argument in Arguments)
             {
                 if (argument.ShortName.HasValue)
                 {
-                    _shortNameLookup.Add(argument.ShortName.Value, argument);
+                    _lookupDictionary.Add(argument.ShortName.Value.ToString(), argument);
                 }
-                foreach (char aliasChar in argument.ShortAliases)
-                {
-                    _shortNameLookup.Add(aliasChar, argument);
-                }
+                _lookupDictionary.AddUnderKeys(argument, argument.ShortAliases.Select(c => c.ToString()));
                 if (!string.IsNullOrEmpty(argument.LongName))
                 {
-                    _longNameLookup.Add(argument.LongName, argument);
+                    _lookupDictionary.Add(argument.LongName, argument);
                 }
-                foreach (string aliasString in argument.LongAliases)
-                {
-                    _longNameLookup.Add(aliasString, argument);
-                }
+                _lookupDictionary.AddUnderKeys(argument, argument.LongAliases);
             }
 
             _ignoreCaseLookupDirectory.Clear();
             if (IgnoreCase)
             {
-                var allLookups = _shortNameLookup
-                    .Select(kvp => new KeyValuePair<string, Argument>(kvp.Key.ToString(), kvp.Value))
-                    .Concat(_longNameLookup);
-                foreach (KeyValuePair<string, Argument> keyValuePair in allLookups)
+                foreach (KeyValuePair<string, Argument> keyValuePair in _lookupDictionary)
                 {
-                    var icString = keyValuePair.Key.ToString().ToUpper();
+                    var icString = keyValuePair.Key.ToUpper();
                     if (_ignoreCaseLookupDirectory.ContainsKey(icString))
                     {
                         throw new ArgumentException("Clash in ignore case argument names: " + icString);
@@ -255,7 +184,7 @@ namespace CommandLineParser
         public void ParseCommandLine(string[] args)
         {
             ParsingSucceeded = false;
-            _arguments.ForEach(action => action.Init());
+            Arguments.ForEach(action => action.Init());
             List<string> argsList = new List<string>(args);
             InitializeArgumentLookupDictionaries();
             ExpandValueArgumentsWithEqualSigns(argsList);
@@ -265,7 +194,7 @@ namespace CommandLineParser
             _argsNotParsed = args;
 
             if ((args.Length == 0 && ShowUsageOnEmptyCommandline) ||
-                (args.Length == 1 && _showUsageCommands.Contains(args[0])))
+                (args.Length == 1 && ShowUsageCommands.Contains(args[0])))
             {
                 ShowUsage();
                 return;
@@ -289,7 +218,7 @@ namespace CommandLineParser
                 ParseAdditionalArguments(argsList, argIndex);
             }
 
-            foreach (Argument argument in _arguments)
+            foreach (Argument argument in Arguments)
             {
                 if (argument is IArgumentWithDefaultValue && !argument.Parsed)
                 {
@@ -355,9 +284,9 @@ namespace CommandLineParser
             {
                 if (AcceptHyphen)
                 {
-                    string argName;
                     if (curArg.Length > 1)
                     {
+                        string argName;
                         if (curArg[1] == '-')
                         {
                             //long name
@@ -431,11 +360,12 @@ namespace CommandLineParser
         /// <seealso cref="CheckMandatoryArguments"/>, <seealso cref="Argument.Optional"/>
         private void PerformMandatoryArgumentsCheck()
         {
-            _arguments.ForEach(delegate (Argument arg)
-                                  {
-                                      if (!arg.Optional && !arg.Parsed)
-                                          throw new MandatoryArgumentNotSetException(string.Format(Messages.EXC_MISSING_MANDATORY_ARGUMENT, arg.Name), arg.Name);
-                                  });
+            Arguments.ForEach(arg =>
+            {
+                if (!arg.Optional && !arg.Parsed)
+                    throw new MandatoryArgumentNotSetException(
+                        string.Format(Messages.EXC_MISSING_MANDATORY_ARGUMENT, arg.Name), arg.Name);
+            });
         }
 
         /// <summary>
@@ -443,10 +373,7 @@ namespace CommandLineParser
         /// </summary>
         private void PerformCertificationCheck()
         {
-            _certifications.ForEach(delegate (ArgumentCertification certification)
-                                       {
-                                           certification.Certify(this);
-                                       });
+            Certifications.ForEach(c => c.Certify(this));
         }
 
         /// <summary>
@@ -493,7 +420,7 @@ namespace CommandLineParser
                     string arg = argsList[i];
                     if (arg.Length > 2)
                     {
-                        if (arg[0] == '/' && arg[1] != '/' && AcceptSlash && _longNameLookup.ContainsKey(arg.Substring(1)))
+                        if (arg[0] == '/' && arg[1] != '/' && AcceptSlash && _lookupDictionary.ContainsKey(arg.Substring(1)))
                             continue;
                         if (arg.Contains('='))
                             continue;
@@ -508,7 +435,7 @@ namespace CommandLineParser
                             //arg ~ -xyz
                             foreach (char c in arg.Substring(1))
                             {
-                                if (_shortNameLookup.ContainsKey(c) && !(_shortNameLookup[c] is SwitchArgument))
+                                if (_lookupDictionary.ContainsKey(c.ToString()) && !(_lookupDictionary[c.ToString()] is SwitchArgument))
                                 {
                                     throw new CommandLineFormatException(
                                         string.Format(Messages.EXC_BAD_ARG_IN_GROUP, c));
@@ -553,7 +480,7 @@ namespace CommandLineParser
                             argsList.RemoveAt(i);
                             if (argument.AllowMultiple)
                             {
-                                var splitted = argValue.Split(equalsSignSyntaxValuesSeparators);
+                                var splitted = argValue.Split(EqualsSignSyntaxValuesSeparators);
                                 foreach (var singleValue in splitted)
                                 {
                                     argsList.Insert(i, argNameWithSep);
@@ -585,19 +512,9 @@ namespace CommandLineParser
         /// <returns>Found argument or null when argument is not present</returns>
         public Argument LookupArgument(string argName)
         {
-            if (argName.Length == 1)
+            if (_lookupDictionary.ContainsKey(argName))
             {
-                if (_shortNameLookup.ContainsKey(argName[0]))
-                {
-                    return _shortNameLookup[argName[0]];
-                }
-            }
-            else
-            {
-                if (_longNameLookup.ContainsKey(argName))
-                {
-                    return _longNameLookup[argName];
-                }
+                return _lookupDictionary[argName];
             }
             if (IgnoreCase && _ignoreCaseLookupDirectory.ContainsKey(argName.ToUpper()))
             {
@@ -606,129 +523,7 @@ namespace CommandLineParser
             // argument not found anywhere
             return null;
         }
-
-        /// <summary>
-        /// Prints arguments information and usage information to
-        /// the <paramref name="outputStream"/>. 
-        /// </summary>
-        public void PrintUsage(TextWriter outputStream)
-        {
-            outputStream.WriteLine(ShowUsageHeader);
-
-            outputStream.WriteLine(Messages.MSG_USAGE);
-
-            foreach (Argument argument in _arguments)
-            {
-                outputStream.Write("\t");
-                bool comma = false;
-                if (argument.ShortName.HasValue)
-                {
-                    outputStream.Write("-" + argument.ShortName);
-                    comma = true;
-                }
-                foreach (char c in argument.ShortAliases)
-                {
-                    if (comma)
-                        outputStream.WriteLine(", ");
-                    outputStream.Write("-" + c);
-                    comma = true;
-                }
-                if (!String.IsNullOrEmpty(argument.LongName))
-                {
-                    if (comma)
-                        outputStream.Write(", ");
-                    outputStream.Write("--" + argument.LongName);
-                    comma = true;
-                }
-                foreach (string str in argument.LongAliases)
-                {
-                    if (comma)
-                        outputStream.Write(", ");
-                    outputStream.Write("--" + str);
-                    comma = true;
-                }
-
-                if (argument.Optional)
-                    outputStream.Write(Messages.MSG_OPTIONAL);
-                outputStream.WriteLine("... {0} ", argument.Description);
-
-                if (!String.IsNullOrEmpty(argument.Example))
-                {
-                    outputStream.WriteLine(Messages.MSG_EXAMPLE_FORMAT, argument.Example);
-                }
-
-                if (!String.IsNullOrEmpty(argument.FullDescription))
-                {
-                    outputStream.WriteLine();
-                    outputStream.WriteLine(argument.FullDescription);
-                }
-                outputStream.WriteLine();
-            }
-
-            if (Certifications.Count > 0)
-            {
-                outputStream.WriteLine(Messages.CERT_REMARKS);
-                foreach (ArgumentCertification certification in Certifications)
-                {
-                    outputStream.WriteLine("\t" + certification.Description);
-                }
-                outputStream.WriteLine();
-            }
-
-            outputStream.WriteLine(ShowUsageFooter);
-        }
-
-        /// <summary>
-        /// Prints arguments information and usage information to the console. 
-        /// </summary>
-        public void ShowUsage()
-        {
-            PrintUsage(Console.Out);
-        }
-
-        /// <summary>
-        /// Prints values of parsed arguments. Can be used for debugging. 
-        /// </summary>
-        public void ShowParsedArguments(bool showOmittedArguments = false)
-        {
-            Console.WriteLine(Messages.MSG_PARSING_RESULTS);
-            Console.WriteLine("\t" + Messages.MSG_COMMAND_LINE);
-            foreach (string arg in _argsNotParsed)
-            {
-                Console.Write(arg);
-                Console.Write(" ");
-            }
-
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("\t" + Messages.MSG_PARSED_ARGUMENTS);
-            foreach (Argument argument in _arguments)
-            {
-                if (argument.Parsed)
-                    argument.PrintValueInfo();
-            }
-            Console.WriteLine();
-            Console.WriteLine("\t" + Messages.MSG_NOT_PARSED_ARGUMENTS);
-            foreach (Argument argument in _arguments)
-            {
-                if (!argument.Parsed)
-                    argument.PrintValueInfo();
-            }
-            Console.WriteLine();
-            if (AdditionalArgumentsSettings.AcceptAdditionalArguments)
-            {
-                Console.WriteLine("\t" + Messages.MSG_ADDITIONAL_ARGUMENTS);
-
-                foreach (string simpleArgument in AdditionalArgumentsSettings.AdditionalArguments)
-                {
-                    Console.Write(simpleArgument + " ");
-                }
-
-                Console.WriteLine();
-                Console.WriteLine();
-            }
-        }
-
+        
         /// <summary>
         /// <para>
         /// Fills FullDescription of all the difined arguments from a resource file. 
@@ -762,17 +557,41 @@ namespace CommandLineParser
             }
         }
 
-        public void Dispose()
+        public void Clear()
         {
-            _arguments.Clear();
-
-            _certifications.Clear();
-
-            _shortNameLookup.Clear();
-
-            _longNameLookup.Clear();
-
+            Arguments.Clear();
+            Certifications.Clear();
+            _lookupDictionary.Clear();
             _ignoreCaseLookupDirectory.Clear();
         }
+            
+        #region delegated to output formatter 
+
+        /// <summary>
+        /// Prints arguments information and usage information to the console. 
+        /// </summary>
+        public void ShowUsage()
+        {
+            _outputFormatter.PrintUsage(Console.Out);
+        }
+
+        /// <summary>
+        /// Prints arguments information and usage information to
+        /// the <paramref name="outputStream"/>. 
+        /// </summary>
+        public void PrintUsage(TextWriter outputStream)
+        {
+            _outputFormatter.PrintUsage(outputStream);
+        }
+
+        /// <summary>
+        /// Prints values of parsed arguments. Can be used for debugging. 
+        /// </summary>
+        public void ShowParsedArguments(bool showOmittedArguments = false)
+        {
+            _outputFormatter.ShowParsedArguments(showOmittedArguments);
+        }
+
+        #endregion 
     }
 }

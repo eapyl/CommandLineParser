@@ -10,31 +10,10 @@ namespace CommandLineParser.Arguments
     /// <typeparam name="TValue">Type of the value</typeparam>
     /// <seealso cref="BoundedValueArgument{TValue}"/>
     /// <seealso cref="EnumeratedValueArgument{TValue}"/>
-    /// <include file='..\Doc\CommandLineParser.xml' path='CommandLineParser/Arguments/CertifiedValueArgument/*'/>
     public abstract class CertifiedValueArgument<TValue> : ValueArgument<TValue>
     {
         #region constructor
-
-        /// <summary>
-        /// Creates new certified value argument with a <see cref="Argument.ShortName">short name</see>.
-        /// </summary>
-        /// <param name="shortName">Short name of the argument</param>
-        protected CertifiedValueArgument(char shortName) : base(shortName) { }
-
-        /// <summary>
-        /// Creates new certified value argument with a <see cref="Argument.LongName">long name</see>.
-        /// </summary>
-        /// <param name="longName">Long name of the argument</param>
-        protected CertifiedValueArgument(string longName) : base(longName) { }
-
-        /// <summary>
-        /// Creates new certified value argument with a <see cref="Argument.ShortName">short name</see>and <see cref="Argument.LongName">long name</see>.
-        /// </summary>
-        /// <param name="shortName">Short name of the argument</param>
-        /// <param name="longName">Long name of the argument </param>
-        protected CertifiedValueArgument(char shortName, string longName)
-            : base(shortName, longName) { }
-
+        
         /// <summary>
         /// Creates new certified value argument with a <see cref="Argument.ShortName">short name</see>,
         /// <see cref="Argument.LongName">long name</see> and <see cref="Argument.Description">description</see>
@@ -42,7 +21,7 @@ namespace CommandLineParser.Arguments
         /// <param name="shortName">Short name of the argument</param>
         /// <param name="longName">Long name of the argument </param>
         /// <param name="description">description of the argument</param>
-        protected CertifiedValueArgument(char shortName, string longName, string description)
+        protected CertifiedValueArgument(char? shortName = null, string longName = null, string description = null)
             : base(shortName, longName, description) { }
 
         #endregion

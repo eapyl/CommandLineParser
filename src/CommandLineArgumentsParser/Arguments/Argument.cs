@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CommandLineParser.Compatiblity;
 using CommandLineParser.Exceptions;
-using CommandLineParser.Extensions;
 
 namespace CommandLineParser.Arguments
 {
@@ -16,10 +16,9 @@ namespace CommandLineParser.Arguments
     /// <seealso cref="CertifiedValueArgument{TValue}"/>
     /// <seealso cref="BoundedValueArgument{TValue}"/>
     /// <seealso cref="EnumeratedValueArgument{TValue}"/>
-    /// <include file='..\Doc\CommandLineParser.xml' path='CommandLineParser/Arguments/Argument/*'/>
     public abstract class Argument
     {
-#region property backing fields
+        #region property backing fields
 
         private char? _shortName;
 
@@ -35,38 +34,11 @@ namespace CommandLineParser.Arguments
         /// </summary>
         private readonly List<string> _longAliases = new List<string>();
 
+        private static readonly char[] BadChars = { '\r', '\n', ' ', '\t' };
+
         #endregion
 
-#region constructors
-
-        /// <summary>
-        /// Creates new command line argument with a <see cref="ShortName">short name</see>.
-        /// </summary>
-        /// <param name="shortName">Short name of the argument</param>
-        protected Argument(char shortName)
-        {
-            ShortName = shortName;
-        }
-
-        /// <summary>
-        /// Creates new command line argument with a <see cref="LongName">long name</see>.
-        /// </summary>
-        /// <param name="longName">Long name of the argument</param>
-        protected Argument(string longName)
-        {
-            LongName = longName;
-        }
-
-        /// <summary>
-        /// Creates new command line argument with a <see cref="ShortName">short name</see>and <see cref="LongName">long name</see>.
-        /// </summary>
-        /// <param name="shortName">Short name of the argument</param>
-        /// <param name="longName">Long name of the argument </param>
-        protected Argument(char shortName, string longName)
-        {
-            LongName = longName;
-            ShortName = shortName;
-        }
+        #region constructors
 
         /// <summary>
         /// Creates new command line argument with a <see cref="ShortName">short name</see>,
@@ -75,14 +47,16 @@ namespace CommandLineParser.Arguments
         /// <param name="shortName">Short name of the argument</param>
         /// <param name="longName">Long name of the argument </param>
         /// <param name="description">Description of the argument</param>
-        protected Argument(char shortName, string longName, string description)
+        protected Argument(char? shortName = null, string longName = null, string description = null)
         {
             Description = description;
             LongName = longName;
             ShortName = shortName;
         }
 
-#endregion
+        #endregion
+
+        #region properties
 
         /// <summary>
         /// Mark argument optional. 
@@ -111,9 +85,7 @@ namespace CommandLineParser.Arguments
         /// <summary>
         /// Description of the argument 
         /// </summary>
-        public string Description { get; set; }
-
-        private static readonly char[] BadChars = { '\r', '\n', ' ', '\t'};
+        public string Description { get; set; }        
 
         /// <summary>
         /// Long name of the argument. Can apear on the command line in --<i>longName</i> format.
@@ -125,7 +97,7 @@ namespace CommandLineParser.Arguments
             get { return _longName; }
             set
             {
-                if (value.IndexOfAny(BadChars) > -1)
+                if (value?.IndexOfAny(BadChars) > -1)
                 {
                     throw new FormatException(Messages.EXC_ARG_NOT_ONE_WORD);
                 }
@@ -207,7 +179,11 @@ namespace CommandLineParser.Arguments
         /// Defines mapping of the value of the argument to a field of another object.
         /// Bound field is updated after the value of the argument is parsed by <see cref="CommandLineParser"/>.
         /// </summary>
-        public FieldArgumentBind ? Bind { get; set; }
+        internal FieldArgumentBind ? Bind { get; set; }
+
+        #endregion
+
+        #region methods
 
         /// <summary>
         /// Creates a short name alias for the parameter. The parameter is processed identically when the alias appears on the command line.
@@ -273,6 +249,8 @@ namespace CommandLineParser.Arguments
         /// according to the value of the argument. Should be called after Parse is called.  
         /// </summary>
         public abstract void UpdateBoundObject();
+
+        #endregion
     }
 
     /// <summary>
@@ -291,32 +269,63 @@ namespace CommandLineParser.Arguments
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public abstract class ArgumentAttribute: Attribute
     {
-        private readonly Argument _argument;
-
-        /// <summary>
-        /// The underlying Argument type
-        /// </summary>
-        public Argument Argument
+        protected struct ConstructorParameter
         {
-            get { return _argument; }
+            public Type Type;
+            public object Value; 
         }
+
+        #region property backing fields
+
+        protected readonly Argument _argument;
+
+        protected readonly Type _underlyingArgumentType;
+
+        #endregion
+
+        #region constructor 
 
         /// <summary>
         /// Creates new instance of ArgumentAttribute.
         /// </summary>
         /// <param name="underlyingArgumentType">Type of the underlying argument.</param>
         /// <param name="constructorParams">Parameters of the constructor of underlying argument</param>
-        protected ArgumentAttribute(Type underlyingArgumentType, params object[] constructorParams)
+        protected ArgumentAttribute(Type underlyingArgumentType, params ConstructorParameter[] constructorParams)
         {
             if (!underlyingArgumentType.GetTypeInfo().IsSubclassOf(typeof(Argument)))
             {
                 throw new InvalidOperationException("Parameter underlyingArgumentType must be a subclass of Argument.");
             }
+            _underlyingArgumentType = underlyingArgumentType;
             //create argument object of proper type using reflection
-            _argument = (Argument)Activator.CreateInstance(underlyingArgumentType, constructorParams);
+            if (constructorParams.Length == 0)
+            {
+                ConstructorInfo[] constructors = _underlyingArgumentType.GetConstructors();
+                ConstructorInfo constructor = constructors.First(c => c.GetParameters().All(p => p.IsOptional));
+                _argument = (Argument)constructor.Invoke(constructor.GetParameters().Select<ParameterInfo, object>(p => null).ToArray());
+            }
+            else
+            {
+                ConstructorInfo constructor = _underlyingArgumentType.GetConstructor(constructorParams.Select(cp => cp.Type).ToArray());
+                _argument = (Argument)constructor.Invoke(constructorParams.Select(cp => cp.Value).ToArray());
+            }
         }
 
-#region delegated argument members
+        #endregion
+
+        #region properties 
+        
+        /// <summary>
+        /// The underlying Argument type
+        /// </summary>
+        protected internal Argument Argument
+        {
+            get { return _argument; }
+        }
+        
+        #endregion 
+
+        #region delegated argument members
 
         /// <summary>
         /// Description of the argument 
@@ -371,9 +380,9 @@ namespace CommandLineParser.Arguments
         /// Short name of the argument. Can apear on the command line in -<i>shortName</i> format.
         /// </summary>
         /// <exception cref="CommandLineFormatException">Name is invalid</exception>
-        public char? ShortName
+        public char ShortName
         {
-            get { return _argument.ShortName; }
+            get { return _argument.ShortName ?? '\0'; }
             set { _argument.ShortName = value; }
         }
 
@@ -411,7 +420,6 @@ namespace CommandLineParser.Arguments
             }
         }
 
-#endregion
-
+        #endregion
     }
 }

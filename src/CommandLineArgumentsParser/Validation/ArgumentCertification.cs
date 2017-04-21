@@ -1,6 +1,6 @@
 using System;
 using System.Reflection;
-using CommandLineParser.Extensions;
+using CommandLineParser.Compatiblity;
 
 namespace CommandLineParser.Validation
 {
@@ -10,10 +10,8 @@ namespace CommandLineParser.Validation
     /// the Certify method is supposed to throw an exception when the arguments
     /// and their values do not meet the do condition.
     /// </summary>
-    /// <include file='..\Doc\CommandLineParser.xml' path='CommandLineParser/Certifications/Certification/*'/>
     public abstract class ArgumentCertification
     {
-        protected string _description;
         /// <summary>
         /// Test the parser for the certification. This method should throw an exception if the condition
         /// is not met. 
@@ -25,28 +23,18 @@ namespace CommandLineParser.Validation
         /// <summary>
         /// Returns description of the certification.
         /// </summary>
-        public virtual string Description
-        {
-            get { return _description; }
-            set { _description = value; }
-        }
+        public virtual string Description { get; set; }
     }
 
     /// <summary>
     /// Use ArgumentCertificationAttribute to define <see cref="ArgumentCertification"/>s declaratively. 
     /// </summary>
-	/// <include file='..\Doc\CommandLineParser.xml' path='CommandLineParser/Certifications/CertificationAttribute/*'/>
     public abstract class ArgumentCertificationAttribute: Attribute
     {
-        private ArgumentCertification certification;
-
         /// <summary>
         /// Underlying <see cref="ArgumentCertification"/> object.
         /// </summary>
-        public ArgumentCertification Certification
-        {
-            get { return certification; }
-        }
+        public ArgumentCertification Certification { get; }
 
         /// <summary>
         /// Creates new instance of ArgumentCertificationAttribute. 
@@ -61,7 +49,7 @@ namespace CommandLineParser.Validation
                 throw new InvalidOperationException("Parameter underlyingArgumentType must be a subclass of ArgumentCertification.");
             }
             //create certification object of proper type using reflection
-            certification = (ArgumentCertification)Activator.CreateInstance(underlyingCertificationType, constructorParams);
+            Certification = (ArgumentCertification)Activator.CreateInstance(underlyingCertificationType, constructorParams);
         }
         public string Description
         {

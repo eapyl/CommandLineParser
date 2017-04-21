@@ -10,10 +10,10 @@ namespace Tests
 #pragma warning disable CS0649
         class ValueArgumentParsingTarget
         {
-            [ValueArgument(typeof(int), 'i', AllowMultiple = true)]
+            [ValueArgument(typeof(int), ShortName = 'i', AllowMultiple = true)]
             public List<int> Numbers;
 
-            [ValueArgument(typeof(int), 'v', DefaultValue = 2, ValueOptional = true)]
+            [ValueArgument(typeof(int), ShortName = 'v', DefaultValue = 2, ValueOptional = true)]
             public int Version;
 
             [ValueArgument(typeof(int?), 'n', Optional = true)]
@@ -22,7 +22,7 @@ namespace Tests
             [ValueArgument(typeof(bool?), 'b', Optional = true)]
             public bool? NullableBool;
 
-            [ValueArgument(typeof(int), 'l', DefaultValue = 0)]
+            [ValueArgument(typeof(int), ShortName = 'l', DefaultValue = 0)]
             public int Length;
         }
 #pragma warning restore CS0649

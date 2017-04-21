@@ -10,10 +10,11 @@ namespace Tests
     {
         private CommandLineParser.CommandLineParser InitEqualSignSyntax()
         {
-            var commandLineParser = new CommandLineParser.CommandLineParser();
-            commandLineParser.AcceptEqualSignSyntaxForValueArguments = true;
-            commandLineParser.ShowUsageOnEmptyCommandline = true;
-
+            var commandLineParser = new CommandLineParser.CommandLineParser()
+            {
+                AcceptEqualSignSyntaxForValueArguments = true,
+                ShowUsageOnEmptyCommandline = true
+            };
             SwitchArgument showArgument = new SwitchArgument('s', "show", "Set whether show or not", true);
 
             SwitchArgument hideArgument = new SwitchArgument('h', "hide", "Set whether hid or not", false);
@@ -24,26 +25,32 @@ namespace Tests
 
             ValueArgument<Point> point = new ValueArgument<Point>('p', "point", "specify the point");
 
-            BoundedValueArgument<int> optimization = new BoundedValueArgument<int>('o', "optimization", 0, 3);
+            BoundedValueArgument<int> optimization = new BoundedValueArgument<int>('o', "optimization", minValue: 0, maxValue: 3);
 
-            EnumeratedValueArgument<string> color = new EnumeratedValueArgument<string>('c', "color", new string[] { "red", "green", "blue" });
-            
-            FileArgument inputFile = new FileArgument('i', "input", "Input file");
-            inputFile.FileMustExist = false;
-            FileArgument outputFile = new FileArgument('x', "output", "Output file");
-            outputFile.FileMustExist = false;
+            EnumeratedValueArgument<string> color = new EnumeratedValueArgument<string>('c', "color", allowedValues: new string[] { "red", "green", "blue" });
 
-            DirectoryArgument inputDirectory = new DirectoryArgument('d', "directory", "Input directory");
-            inputDirectory.DirectoryMustExist = false;
-
+            FileArgument inputFile = new FileArgument('i', "input", "Input file")
+            {
+                FileMustExist = false
+            };
+            FileArgument outputFile = new FileArgument('x', "output", "Output file")
+            {
+                FileMustExist = false
+            };
+            DirectoryArgument inputDirectory = new DirectoryArgument('d', "directory", "Input directory")
+            {
+                DirectoryMustExist = false
+            };
             point.ConvertValueHandler = delegate (string stringValue)
             {
                 if (stringValue.StartsWith("[") && stringValue.EndsWith("]"))
                 {
                     string[] parts = stringValue.Substring(1, stringValue.Length - 2).Split(';', ',');
-                    Point p = new Point();
-                    p.x = int.Parse(parts[0]);
-                    p.y = int.Parse(parts[1]);
+                    Point p = new Point()
+                    {
+                        x = int.Parse(parts[0]),
+                        y = int.Parse(parts[1])
+                    };
                     return p;
                 }
 
@@ -152,8 +159,10 @@ namespace Tests
         {
             string[] args = new[] { "-n=\"1,2,3\"", "x" };
 
-            var commandLineParser = new CommandLineParser.CommandLineParser();
-            commandLineParser.AcceptEqualSignSyntaxForValueArguments = true;
+            var commandLineParser = new CommandLineParser.CommandLineParser()
+            {
+                AcceptEqualSignSyntaxForValueArguments = true
+            };
             ValueArgument<int> lines = new ValueArgument<int>('n', "lines", "Specific lines") { AllowMultiple = true };
             commandLineParser.Arguments.Add(lines);
 
@@ -171,8 +180,10 @@ namespace Tests
         {
             string[] args = new[] { "-n=1,2,3", "-n=4" };
 
-            var commandLineParser = new CommandLineParser.CommandLineParser();
-            commandLineParser.AcceptEqualSignSyntaxForValueArguments = true;
+            var commandLineParser = new CommandLineParser.CommandLineParser()
+            {
+                AcceptEqualSignSyntaxForValueArguments = true
+            };
             ValueArgument<int> lines = new ValueArgument<int>('n', "lines", "Specific lines") { AllowMultiple = true };
             commandLineParser.Arguments.Add(lines);
 
@@ -188,8 +199,10 @@ namespace Tests
         {
             string[] args = new[] { "-n=", "-n=" };
 
-            var commandLineParser = new CommandLineParser.CommandLineParser();
-            commandLineParser.AcceptEqualSignSyntaxForValueArguments = true;
+            var commandLineParser = new CommandLineParser.CommandLineParser()
+            {
+                AcceptEqualSignSyntaxForValueArguments = true
+            };
             ValueArgument<int> lines = new ValueArgument<int>('n', "lines", "Specific lines") { AllowMultiple = true, ValueOptional=true };
             commandLineParser.Arguments.Add(lines);
 

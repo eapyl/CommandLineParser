@@ -1,4 +1,5 @@
 using CommandLineParser.Arguments;
+using CommandLineParser.Exceptions;
 using CommandLineParser.Validation;
 using CommandLineParser.Exceptions;
 using Xunit;
@@ -9,31 +10,31 @@ namespace Tests
     {
         public class Archiver
         {
-            [ValueArgument(typeof(string), 'f', "file", Description = "Input from file")]
+            [ValueArgument(typeof(string), ShortName = 'f', LongName = "file", Description = "Input from file")]
             public string InputFromFile;
 
-            [ValueArgument(typeof(string), 'u', "url", Description = "Input from url")]
+            [ValueArgument(typeof(string), ShortName = 'u', LongName = "url", Description = "Input from url")]
             public string InputFromUrl;
 
-            [ValueArgument(typeof(string), 'c', "create", Description = "Create archive")]
+            [ValueArgument(typeof(string), ShortName = 'c', LongName = "create", Description = "Create archive")]
             public string CreateArchive;
 
-            [ValueArgument(typeof(string), 'x', "extract", Description = "Extract archive")]
+            [ValueArgument(typeof(string), ShortName = 'x', LongName = "extract", Description = "Extract archive")]
             public string ExtractArchive;
 
-            [ValueArgument(typeof(string), 'o', "open", Description = "Open archive")]
+            [ValueArgument(typeof(string), ShortName = 'o', LongName = "open", Description = "Open archive")]
             public string OpenArchive;
 
-            [SwitchArgument('j', "g1a1", true)]
+            [SwitchArgument(ShortName = 'j', LongName = "g1a1", DefaultValue = true)]
             public bool group1Arg1;
 
-            [SwitchArgument('k', "g1a2", true)]
+            [SwitchArgument(ShortName = 'k', LongName = "g1a2", DefaultValue = true)]
             public bool group1Arg2;
 
-            [SwitchArgument('l', "g2a1", true)]
+            [SwitchArgument(ShortName = 'l', LongName = "g2a1", DefaultValue = true)]
             public bool group2Arg1;
 
-            [SwitchArgument('m', "g2a2", true)]
+            [SwitchArgument(ShortName = 'm', LongName = "g2a2", DefaultValue = true)]
             public bool group2Arg2;
         }
 
@@ -106,9 +107,10 @@ namespace Tests
         public void GroupCertifications_ExactlyOneUsed_customError()
         {
             // exactly one of the arguments x, o, c must be used
-            ArgumentGroupCertification eou = new ArgumentGroupCertification("x,o,c", EArgumentGroupCondition.ExactlyOneUsed);
-            eou.Description = "my custom error";
-
+            ArgumentGroupCertification eou = new ArgumentGroupCertification("x,o,c", EArgumentGroupCondition.ExactlyOneUsed)
+            {
+                Description = "my custom error"
+            };
             var commandLineParser = InitGroupCertifications();
             commandLineParser.Certifications.Clear();
             commandLineParser.Certifications.Add(eou);

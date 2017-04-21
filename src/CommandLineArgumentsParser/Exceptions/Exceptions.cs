@@ -181,4 +181,21 @@ namespace CommandLineParser.Exceptions
 		{
 		}
 	}
+
+    /// <summary>
+    /// Thrown when there is some conflict among the used arguments. 
+    /// </summary>
+    public class ArgumentConflictException : CommandLineException
+    {
+        /// <summary>
+        /// Creates new instance of <see cref="ArgumentConflictException" />
+        /// </summary>
+        /// <param name="message">cause of the exception</param>
+        public ArgumentConflictException(string message)
+            : base(message)
+        {
+
+        }
+    }
+
 }

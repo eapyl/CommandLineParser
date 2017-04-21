@@ -11,34 +11,34 @@ namespace Tests
 #pragma warning disable CS0649
         class DeclarativeArgumentsParsingTarget
         {
-            [SwitchArgument('s', "show", true, Description = "Set whether show or not")]
+            [SwitchArgument(ShortName = 's', LongName = "show", DefaultValue = true, Description = "Set whether show or not")]
             public bool show;
 
-            [SwitchArgument('h', "hide", false, Description = "Set whether hide or not")]
+            [SwitchArgument(ShortName = 'h', LongName = "hide", DefaultValue = false, Description = "Set whether hide or not")]
             public bool Hide { get; set; }
 
-            [ValueArgument(typeof(decimal), 'v', "version", Description = "Set desired version", Aliases = new [] { "w", "ver"})]
+            [ValueArgument(typeof(decimal), ShortName = 'v', LongName = "version", Description = "Set desired version", Aliases = new [] { "w", "ver"})]
             public decimal version;
 
-            [ValueArgument(typeof(string), 'l', "level", Description = "Set the level")]
+            [ValueArgument(typeof(string), ShortName = 'l', LongName = "level", Description = "Set the level")]
             public string level;
 
-            [ValueArgument(typeof(Point), 'p', "point", Description = "specify the point")]
+            [ValueArgument(typeof(Point), ShortName = 'p', LongName = "point", Description = "specify the point")]
             public Point point;
 
-            [BoundedValueArgument(typeof(int), 'o', "optimization", MinValue = 0, MaxValue = 3, Description = "Level of optimization")]
+            [BoundedValueArgument(typeof(int), ShortName = 'o', LongName = "optimization", MinValue = 0, MaxValue = 3, Description = "Level of optimization")]
             public int optimization;
 
-            [EnumeratedValueArgument(typeof(string), 'c', "color", AllowedValues = "red;green;blue")]
+            [EnumeratedValueArgument(typeof(string), ShortName = 'c', LongName = "color", AllowedValues = "red;green;blue")]
             public string color;
 
-            [FileArgument('i', "input", Description = "Input file", FileMustExist = false)]
+            [FileArgument(ShortName = 'i', LongName = "input", Description = "Input file", FileMustExist = false)]
             public FileInfo inputFile;
 
-            [FileArgument('x', "output", Description = "Output file", FileMustExist = false)]
+            [FileArgument(ShortName = 'x', LongName = "output", Description = "Output file", FileMustExist = false)]
             public FileInfo outputFile;
 
-            [DirectoryArgument('d', "directory", Description = "Input directory", DirectoryMustExist = false)]
+            [DirectoryArgument(ShortName = 'd', LongName = "directory", Description = "Input directory", DirectoryMustExist = false)]
             public DirectoryInfo InputDirectory;
         }
 #pragma warning restore CS0649

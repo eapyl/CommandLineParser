@@ -38,8 +38,8 @@ namespace Tests
         {
             // ARRANGE 
             var parser = new CommandLineParser.CommandLineParser();
-            parser.Arguments.Add(new SwitchArgument('a', "switch", false));
-            parser.Arguments.Add(new SwitchArgument('b', "SWiTCH", false));
+            parser.Arguments.Add(new SwitchArgument('a', "switch"));
+            parser.Arguments.Add(new SwitchArgument('b', "SWiTCH"));
             parser.IgnoreCase = false; 
 
             // ACT 
@@ -51,8 +51,8 @@ namespace Tests
         {
             // ARRANGE 
             var parser = new CommandLineParser.CommandLineParser();
-            parser.Arguments.Add(new SwitchArgument('a', "switch", false));
-            parser.Arguments.Add(new SwitchArgument('b', "SWiTCH", false));
+            parser.Arguments.Add(new SwitchArgument('a', "switch"));
+            parser.Arguments.Add(new SwitchArgument('b', "SWiTCH"));
             parser.IgnoreCase = true;
 
             // ACT 
@@ -64,7 +64,7 @@ namespace Tests
         {
             // ARRANGE 
             var parser = new CommandLineParser.CommandLineParser();
-            var switchArgument = new SwitchArgument("switch", false);
+            var switchArgument = new SwitchArgument(longName: "switch");
             parser.Arguments.Add(switchArgument);
 
             // ACT 

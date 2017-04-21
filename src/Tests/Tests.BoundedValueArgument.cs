@@ -10,7 +10,7 @@ namespace Tests
 #pragma warning disable CS0649
         class BoundedValueArgumentParsingTarget
         {
-            [BoundedValueArgument(typeof(int), 'd', "duration", Description = "The duration of the acoustic data used in the adaptation.", 
+            [BoundedValueArgument(typeof(int), ShortName ='d', LongName = "duration", Description = "The duration of the acoustic data used in the adaptation.", 
                 ValueOptional = true, MinValue = 0, DefaultValue = 0)]
             public int Duration { get; set; }
         }

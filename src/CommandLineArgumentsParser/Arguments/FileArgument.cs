@@ -9,36 +9,19 @@ namespace CommandLineParser.Arguments
 	/// </summary>
 	public class FileArgument: CertifiedValueArgument<FileInfo>
 	{
-		#region constructor
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="FileArgument"/> class.
-		/// </summary>
-		/// <param name="shortName">Short name of the argument</param>
-		public FileArgument(char shortName) : base(shortName) { }
-
+        #region constructor
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="FileArgument"/> class.
         /// </summary>
-        /// <param name="longName">Long name of the argument</param>
-        public FileArgument(string longName) : base(longName) { }
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="FileArgument"/> class.
-		/// </summary>
-		/// <param name="shortName">The short name.</param>
-		/// <param name="longName">The long name.</param>
-		public FileArgument(char shortName, string longName) : base(shortName, longName) { }
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="FileArgument"/> class.
-		/// </summary>
-		/// <param name="shortName">The short name.</param>
-		/// <param name="longName">The long name.</param>
-		/// <param name="description">The description.</param>
-		public FileArgument(char shortName, string longName, string description) : base(shortName, longName, description) { }
+        /// <param name="shortName">The short name.</param>
+        /// <param name="longName">The long name.</param>
+        /// <param name="description">The description.</param>
+        public FileArgument(char? shortName = null, string longName = null, string description = null) : base(shortName, longName, description) { }
 
         #endregion
+
+        #region property 
 
         /// <summary>
         /// Gets or sets a value indicating whether the file must
@@ -47,23 +30,21 @@ namespace CommandLineParser.Arguments
         /// </summary>
         public bool FileMustExist { get; set; } = true;
 
-	    /// <summary>
-		/// FileInfo for the file passed as argument.
-		/// </summary>
-		public FileInfo FileInfo
-		{
-			get
-			{
-				return Value; 
-			}
-		}
+        /// <summary>
+        /// FileInfo for the file passed as argument.
+        /// </summary>
+        public FileInfo FileInfo => Value;
 
-		/// <summary>
-		/// Returns stream of the input file ready for reading. Available only 
-		/// when <see cref="FileMustExist"/> is set to true.
-		/// </summary>
-		/// <returns></returns>
-		public FileStream OpenFileRead()
+        #endregion
+
+        #region methods
+
+        /// <summary>
+        /// Returns stream of the input file ready for reading. Available only 
+        /// when <see cref="FileMustExist"/> is set to true.
+        /// </summary>
+        /// <returns></returns>
+        public FileStream OpenFileRead()
 		{
 			if (!FileMustExist)
 			{
@@ -72,11 +53,11 @@ namespace CommandLineParser.Arguments
 			return Value.OpenRead();
 		}
 
-		/// <summary>
-		/// Returns stream of the output file ready for writing. 
-		/// </summary>
-		/// <returns></returns>
-		public FileStream OpenFileWrite()
+        /// <summary>
+        /// Returns stream of the output file ready for writing. 
+        /// </summary>
+        /// <returns></returns>
+        public FileStream OpenFileWrite()
 		{
 			return Value.OpenWrite();
 		}
@@ -102,7 +83,9 @@ namespace CommandLineParser.Arguments
 				throw new FileNotFoundException(string.Format(Messages.EXC_FILE_NOT_FOUND, value.Name));
 			}
 		}
-	}
+
+        #endregion
+    }
 
 	/// <summary>
 	/// <para>
@@ -123,23 +106,7 @@ namespace CommandLineParser.Arguments
 		/// Creates new instance of FileArgumentAttribute. FileArgumentAttribute
 		/// uses underlying <see cref="FileArgument"/>.
 		/// </summary>
-		/// <param name="shortName"><see cref="Argument.ShortName">short name</see> of the underlying argument</param>
-		public FileArgumentAttribute(char shortName) : base(typeof(FileArgument), shortName) { }
-
-        /// <summary>
-        /// Creates new instance of FileArgumentAttribute. FileArgumentAttribute
-        /// uses underlying <see cref="FileArgument"/>.
-        /// </summary>
-        /// <param name="longName"><see cref="Argument.LongName">long name</see> of the underlying argument</param>
-        public FileArgumentAttribute(string longName) : base(typeof(FileArgument), longName) { }
-
-		/// <summary>
-		/// Creates new instance of FileArgumentAttribute. FileArgumentAttribute
-		/// uses underlying <see cref="FileArgument"/>.
-		/// </summary>
-		/// <param name="shortName"><see cref="Argument.ShortName">short name</see> of the underlying argument</param>
-		/// <param name="longName"><see cref="Argument.LongName">long name</see> of the underlying argument</param>
-		public FileArgumentAttribute(char shortName, string longName) : base(typeof(FileArgument), shortName, longName) { }
+		public FileArgumentAttribute() : base(typeof(FileArgument)) { }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether the file must

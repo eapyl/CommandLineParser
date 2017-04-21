@@ -9,10 +9,11 @@ namespace Tests
     {
         private CommandLineParser.CommandLineParser InitIgnoreCase()
         {
-            var commandLineParser = new CommandLineParser.CommandLineParser();
-            commandLineParser.IgnoreCase = true;
-            commandLineParser.ShowUsageOnEmptyCommandline = true;
-
+            var commandLineParser = new CommandLineParser.CommandLineParser()
+            {
+                IgnoreCase = true,
+                ShowUsageOnEmptyCommandline = true
+            };
             SwitchArgument showArgument = new SwitchArgument('s', "show", "Set whether show or not", true);
 
             SwitchArgument hideArgument = new SwitchArgument('h', "hide", "Set whether hid or not", false);
@@ -23,27 +24,33 @@ namespace Tests
 
             ValueArgument<Point> point = new ValueArgument<Point>('p', "point", "specify the point");
 
-            BoundedValueArgument<int> optimization = new BoundedValueArgument<int>('o', "optimization", 0, 3);
+            BoundedValueArgument<int> optimization = new BoundedValueArgument<int>('o', "optimization", minValue: 0, maxValue: 3);
 
-            EnumeratedValueArgument<string> color = new EnumeratedValueArgument<string>('c', "color", new[] { "red", "green", "blue" });
+            EnumeratedValueArgument<string> color = new EnumeratedValueArgument<string>('c', "color", allowedValues: new[] { "red", "green", "blue" });
 
-            FileArgument inputFile = new FileArgument('i', "input", "Input file");
-            inputFile.FileMustExist = false;
-            FileArgument outputFile = new FileArgument('x', "output", "Output file");
-            outputFile.FileMustExist = false;
-
-            DirectoryArgument inputDirectory = new DirectoryArgument('d', "directory", "Input directory");
-            inputDirectory.DirectoryMustExist = false;
-
+            FileArgument inputFile = new FileArgument('i', "input", "Input file")
+            {
+                FileMustExist = false
+            };
+            FileArgument outputFile = new FileArgument('x', "output", "Output file")
+            {
+                FileMustExist = false
+            };
+            DirectoryArgument inputDirectory = new DirectoryArgument('d', "directory", "Input directory")
+            {
+                DirectoryMustExist = false
+            };
             point.ConvertValueHandler = delegate (string stringValue)
             {
                 if (stringValue.StartsWith("[") && stringValue.EndsWith("]"))
                 {
                     string[] parts =
                         stringValue.Substring(1, stringValue.Length - 2).Split(';', ',');
-                    Point p = new Point();
-                    p.x = int.Parse(parts[0]);
-                    p.y = int.Parse(parts[1]);
+                    Point p = new Point()
+                    {
+                        x = int.Parse(parts[0]),
+                        y = int.Parse(parts[1])
+                    };
                     return p;
                 }
 

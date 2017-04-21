@@ -9,7 +9,7 @@ namespace Tests
         {
             private bool defaultFalse;
 
-            [SwitchArgument('f', false)]
+            [SwitchArgument(ShortName = 'f', DefaultValue = false)]
             public bool DefaultFalse
             {
                 get { return defaultFalse; }
@@ -20,7 +20,7 @@ namespace Tests
                 }
             }
 
-            [ValueArgument(typeof(string), 'p')]
+            [ValueArgument(typeof(string), ShortName = 'p')]
             public string Path { get; set; }
         }
 
@@ -28,7 +28,7 @@ namespace Tests
         {
             private bool defaultTrue;
 
-            [SwitchArgument('t', true)]
+            [SwitchArgument(ShortName = 't', DefaultValue = true)]
             public bool DefaultTrue
             {
                 get { return defaultTrue; }
