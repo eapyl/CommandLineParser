@@ -26,6 +26,7 @@
     <!--<SignAssembly>True</SignAssembly>-->
     <AssemblyOriginatorKeyFile>CommandLineArgumentsParser.pfx</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net20' ">
