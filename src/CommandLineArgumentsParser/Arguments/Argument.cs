@@ -266,10 +266,10 @@ namespace CommandLineParser.Arguments
     /// <remarks>Use <see cref="CommandLineParser.ExtractArgumentAttributes"/> for each object 
     /// you where you have delcared argument attributes.
     /// </remarks>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public abstract class ArgumentAttribute: Attribute
     {
-        protected struct ConstructorParameter
+        protected internal struct ConstructorParameter
         {
             public Type Type;
             public object Value; 
@@ -277,9 +277,9 @@ namespace CommandLineParser.Arguments
 
         #region property backing fields
 
-        protected readonly Argument _argument;
+        protected Argument _argument;
 
-        protected readonly Type _underlyingArgumentType;
+        protected Type _underlyingArgumentType;
 
         #endregion
 
@@ -291,6 +291,16 @@ namespace CommandLineParser.Arguments
         /// <param name="underlyingArgumentType">Type of the underlying argument.</param>
         /// <param name="constructorParams">Parameters of the constructor of underlying argument</param>
         protected ArgumentAttribute(Type underlyingArgumentType, params ConstructorParameter[] constructorParams)
+        {
+            CreateUnderlyingArgumentType(underlyingArgumentType, constructorParams);
+            var lazyArgument = _argument as LazyArgument;
+            if (lazyArgument != null)
+            {
+                lazyArgument.ConstructorParams = constructorParams;                
+            }
+        }
+
+        protected internal void CreateUnderlyingArgumentType(Type underlyingArgumentType, ConstructorParameter[] constructorParams)
         {
             if (!underlyingArgumentType.GetTypeInfo().IsSubclassOf(typeof(Argument)))
             {
@@ -314,9 +324,9 @@ namespace CommandLineParser.Arguments
         #endregion
 
         #region properties 
-        
+
         /// <summary>
-        /// The underlying Argument type
+        /// The underlying Argument 
         /// </summary>
         protected internal Argument Argument
         {

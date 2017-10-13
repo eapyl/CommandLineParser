@@ -1,10 +1,10 @@
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Reflection;
 using CommandLineParser.Compatiblity;
 using CommandLineParser.Exceptions;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
 
 namespace CommandLineParser.Arguments
 {
@@ -32,10 +32,12 @@ namespace CommandLineParser.Arguments
 
         private readonly List<TValue> _values = new List<TValue>();
 
+        private CultureInfo _cultureInfo = CultureInfo.InvariantCulture;
+
         #endregion
 
         #region constructor
-        
+
         /// <summary>
         /// Creates new value argument with a <see cref="Argument.ShortName">short name</see>,
         /// <see cref="Argument.LongName">long name</see> and <see cref="Argument.Description">description</see>.
@@ -437,6 +439,7 @@ namespace CommandLineParser.Arguments
     /// you where you have delcared argument attributes.</remarks>
     public class ValueArgumentAttribute : ArgumentAttribute
     {        
+
         /// <summary>
         /// Creates new instance of ValueArgument. ValueArgument
         /// uses underlying <see cref="ValueArgument{TValue}"/>.
@@ -451,17 +454,33 @@ namespace CommandLineParser.Arguments
             : base(typeof(ValueArgument<>).MakeGenericType(type)) { }
 
         /// <summary>
+        /// Creates new instance of ValueArgument. ValueArgument
+        /// uses underlying <see cref="ValueArgument{TValue}"/>.
+        /// </summary>
+        /// <param name="type">Type of the generic parameter of <see cref="ValueArgument{TValue}"/>.</param>
+        /// <remarks>
+        /// TValue will be inferred from the field/property where the argument is applied.
+        /// TValue has to be either built-in 
+        /// type or has to define a static Parse(String, CultureInfo) 
+        /// method for reading the value from string.
+        /// </remarks>    
+        public ValueArgumentAttribute(): base(typeof(LazyArgument))
+        {
+            ((LazyArgument)Argument).GenericArgumentType = typeof(ValueArgument<>);
+        }
+
+        /// <summary>
         /// Default value
         /// </summary>
         public object DefaultValue
         {
             get
             {
-                return underlyingValueArgument.GetPropertyValue<object>("DefaultValue", Argument);
+                return _underlyingArgumentType.GetPropertyValue<object>("DefaultValue", Argument);
             }
             set
             {
-                underlyingValueArgument.SetPropertyValue("DefaultValue", Argument, value);
+                _underlyingArgumentType.SetPropertyValue("DefaultValue", Argument, value);
             }
         }
 
@@ -477,11 +496,11 @@ namespace CommandLineParser.Arguments
         {
             get
             {
-                return underlyingValueArgument.GetPropertyValue<bool>("ValueOptional", Argument);
+                return _underlyingArgumentType.GetPropertyValue<bool>("ValueOptional", Argument);
             }
             set
             {
-                underlyingValueArgument.SetPropertyValue("ValueOptional", Argument, value);
+                _underlyingArgumentType.SetPropertyValue("ValueOptional", Argument, value);
             }
         }
     }

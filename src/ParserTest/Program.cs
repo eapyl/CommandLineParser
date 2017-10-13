@@ -30,10 +30,10 @@ namespace ParserTest
         [ValueArgument(typeof(Point), ShortName = 'p', LongName = "point", Description = "Specify the point", Example = "[0,1]")]
         public Point point;
 
-        [ValueArgument(typeof(int?), 'n', "nullableint", Description = "Nullable Integer", Optional = true)]
+        [ValueArgument(typeof(int?), ShortName = 'n', LongName = "nullableint", Description = "Nullable Integer", Optional = true)]
         public int? NullableInt;
 
-        [BoundedValueArgument(typeof(int), ShortName = 'o', LongName = "optimization", MinValue = 0, MaxValue = 3, Description = "Level of optimization")]
+        [BoundedValueArgument(ShortName = 'o', LongName = "optimization", MinValue = 0, MaxValue = 3, Description = "Level of optimization")]
         public int optimization;
 
         [EnumeratedValueArgument(typeof(string), ShortName = 'c', LongName = "color", AllowedValues = "red;green;blue")]

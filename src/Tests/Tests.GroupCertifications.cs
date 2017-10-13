@@ -414,27 +414,27 @@ namespace Tests
         [ArgumentRequiresOtherArgumentsCertification("h", "p,c,i,o")]
         internal class TestDefaultValues
         {
-            [ValueArgument(typeof(string), 's', "serverName", Description = "The friendly name given to the rabbit server connection.")]
+            [ValueArgument(typeof(string), ShortName = 's', LongName = "serverName", Description = "The friendly name given to the rabbit server connection.")]
             public string ServerName { get; set; }
 
-            [ValueArgument(typeof(string), 'h', "hostName", Description = "The fully qualified host name of the rabbit server.")]
+            [ValueArgument(typeof(string), ShortName = 'h', LongName = "hostName", Description = "The fully qualified host name of the rabbit server.")]
             public string ServerHostName { get; set; }
 
-            [ValueArgument(typeof(int), 'p', "port", Description = "The port that should be used to connect to the rabbit server.", DefaultValue = 5672)]
+            [ValueArgument(typeof(int), ShortName = 'p', LongName = "port", Description = "The port that should be used to connect to the rabbit server.", DefaultValue = 5672)]
             public int Port { get; set; }
 
-            [RegexValueArgument('c', "credentials", ".*",
+            [RegexValueArgument(".*", ShortName = 'c', LongName = "credentials",
                 Description =
                     "The username and password that needs to be used to connect to the rabbit server.  This needs to be in the format username|password")]
             public string Credentials { get; set; }
 
-            [ValueArgument(typeof(string), 'v', "virtualHost", Description = "The virtual host on the rabbit server that contains the scribe exchanges.", DefaultValue = "v.pds.ren.scribe")]
+            [ValueArgument(typeof(string), ShortName = 'v', LongName = "virtualHost", Description = "The virtual host on the rabbit server that contains the scribe exchanges.", DefaultValue = "v.pds.ren.scribe")]
             public string ScribeVirtualHost { get; set; }
 
-            [ValueArgument(typeof(string), 'i', "input", Description = "The scribe input exchange.", DefaultValue = "e.pds.tools.scribe.input")]
+            [ValueArgument(typeof(string), ShortName = 'i', LongName = "input", Description = "The scribe input exchange.", DefaultValue = "e.pds.tools.scribe.input")]
             public string ScribeInputExchange { get; set; }
 
-            [ValueArgument(typeof(string), 'o', "output", Description = "The scribe output exchange.", DefaultValue = "e.pds.tools.scribe.output")]
+            [ValueArgument(typeof(string), ShortName = 'o', LongName = "output", Description = "The scribe output exchange.", DefaultValue = "e.pds.tools.scribe.output")]
             public string ScribeOutputExchange { get; set; }
         }
 

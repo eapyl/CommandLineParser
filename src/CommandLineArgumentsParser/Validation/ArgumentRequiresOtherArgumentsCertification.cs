@@ -26,9 +26,9 @@ namespace CommandLineParser.Validation
             _argumentsRequiredForMainArgument = argumentsRequiredForMainArgument;            
             _argumentsRequiredForMainArgumentString = ArgumentGroupCertification.GetGroupStringFromArguments(argumentsRequiredForMainArgument);
             _mainArgumentString = ArgumentGroupCertification.GetGroupStringFromArguments(new[] { mainArgument });
-            if (_description == null)
+            if (Description == null)
             {
-                _description = DefaultUsageDescription();
+                Description = DefaultUsageDescription();
             }
         }
 
@@ -43,9 +43,9 @@ namespace CommandLineParser.Validation
         {
             _argumentsRequiredForMainArgumentString = argumentsRequiredForMainArgument;
             _mainArgumentString = mainArgument;
-            if (_description == null)
+            if (Description == null)
             {
-                _description = DefaultUsageDescription();
+                Description = DefaultUsageDescription();
             }
         }
 

@@ -29,7 +29,7 @@ namespace Tests
             [BoundedValueArgument(typeof(int), ShortName = 'o', LongName = "optimization", MinValue = 0, MaxValue = 3, Description = "Level of optimization")]
             public int optimization;
 
-            [EnumeratedValueArgument(typeof(string), ShortName = 'c', LongName = "color", AllowedValues = "red;green;blue")]
+            [EnumeratedValueArgument(ShortName = 'c', LongName = "color", AllowedValues = "red;green;blue")]
             public string color;
 
             [FileArgument(ShortName = 'i', LongName = "input", Description = "Input file", FileMustExist = false)]

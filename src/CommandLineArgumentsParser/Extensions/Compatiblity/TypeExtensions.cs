@@ -32,6 +32,11 @@ namespace CommandLineParser.Compatiblity
 
         public static void SetPropertyValue(this Type type, string propertyName, object target, object value)
         {
+            if (target is Arguments.LazyArgument)
+            {
+                ((Arguments.LazyArgument)target).PropertyValues[propertyName] = value;
+                return;
+            }
 #if (!(NET40 || NET35 || NET20))
             PropertyInfo property = GetMember(type.GetTypeInfo(), propertyName, (ti, n) => ti.GetDeclaredProperty(n));
             property.SetValue(target, value);
@@ -79,5 +84,20 @@ namespace CommandLineParser.Compatiblity
             return null;
         }
 #endif
+
+        public static Type GetMemberType(this MemberInfo memberInfo)
+        {
+            var prop = memberInfo as PropertyInfo;
+            if (prop != null)
+            {
+                return prop.PropertyType;
+            }
+            var field = memberInfo as FieldInfo;
+            if (field != null)
+            {
+                return field.FieldType;
+            }
+            return null;
+        }
     }
 }

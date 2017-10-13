@@ -148,6 +148,21 @@ namespace CommandLineParser.Arguments
             : base(typeof(EnumeratedValueArgument<>).MakeGenericType(type)) { }
 
         /// <summary>
+		/// Creates new instance of EnumeratedValueArgument. EnumeratedValueArgument
+		/// uses underlying <see cref="EnumeratedValueArgument{TValue}"/>.
+        /// </summary>		        
+        /// <remarks>
+        /// TValue will be inferred from the field/property where the argument is applied.
+        /// TValue has to be either built-in 
+        /// type or has to define a static Parse(String, CultureInfo) 
+        /// method for reading the value from string.
+        /// </remarks>    
+        public EnumeratedValueArgumentAttribute(): base(typeof(LazyArgument))
+        {
+            ((LazyArgument)Argument).GenericArgumentType = typeof(EnumeratedValueArgument<>);
+        }
+
+        /// <summary>
         /// Allowed values of the argument, separated by commas or semicolons.
         /// </summary>
         public string AllowedValues

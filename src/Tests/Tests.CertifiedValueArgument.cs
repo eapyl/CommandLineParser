@@ -10,10 +10,10 @@ namespace Tests
     {
         class CertifiedValueArgumentParsingTarget
         {
-            [BoundedValueArgument(typeof(int), ShortName = 'i', MaxValue = 10, UseMaxValue = true, AllowMultiple = true)]
+            [BoundedValueArgument(ShortName = 'i', MaxValue = 10, UseMaxValue = true, AllowMultiple = true)]
             public List<int> Numbers = new List<int>();
 
-            [EnumeratedValueArgument(typeof(string), ShortName = 's', AllowedValues = "Error,Warning", IgnoreCase = true)]
+            [EnumeratedValueArgument(ShortName = 's', AllowedValues = "Error,Warning", IgnoreCase = true)]
             public string Severity { get; set; }
         }
 

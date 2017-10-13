@@ -132,6 +132,21 @@ namespace CommandLineParser.Arguments
             : base(typeof(BoundedValueArgument<>).MakeGenericType(type)) { }
 
         /// <summary>
+        /// Creates new instance of BoundedValueArgument. BoundedValueArgument
+        /// uses underlying <see cref="BoundedValueArgument{TValue}"/>.
+        /// </summary>        
+        /// <remarks>
+        /// TValue will be inferred from the field/property where the argument is applied.
+        /// TValue has to be either built-in 
+        /// type or has to define a static Parse(String, CultureInfo) 
+        /// method for reading the value from string.
+        /// </remarks>        
+        public BoundedValueArgumentAttribute(): base(typeof(LazyArgument))
+        {
+            ((LazyArgument)Argument).GenericArgumentType = typeof(BoundedValueArgument<>);
+        }
+
+        /// <summary>
         /// Maximal allowed value (inclusive) 
         /// </summary>
         public object MaxValue

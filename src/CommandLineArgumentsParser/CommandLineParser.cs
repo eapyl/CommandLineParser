@@ -9,6 +9,7 @@ using CommandLineParser.Compatiblity;
 using CommandLineParser.Exceptions;
 using CommandLineParser.Validation;
 using CommandLineParser.Extensions;
+using TypeExtensions = CommandLineParser.Compatiblity.TypeExtensions;
 
 namespace CommandLineParser
 {
@@ -228,7 +229,7 @@ namespace CommandLineParser
 
             PerformMandatoryArgumentsCheck();
             PerformCertificationCheck();
-            ParsingSucceeded = true; 
+            ParsingSucceeded = true;
         }
 
         /// <summary>
@@ -254,11 +255,15 @@ namespace CommandLineParser
             foreach (MemberInfo info in fieldAndProps)
             {
                 var attrs = info.GetCustomAttributes(typeof(ArgumentAttribute), true).ToArray();
-
                 if (attrs.Length == 1 && attrs[0] is ArgumentAttribute)
                 {
-                    Arguments.Add(((ArgumentAttribute)attrs[0]).Argument);
-                    ((ArgumentAttribute)attrs[0]).Argument.Bind =
+                    var argumentAttribute = (ArgumentAttribute)attrs[0];
+                    if (argumentAttribute.Argument is LazyArgument)
+                    {
+                        InitializeLazyArgument(info, argumentAttribute);
+                    }
+                    Arguments.Add(argumentAttribute.Argument);
+                    (argumentAttribute).Argument.Bind =
                         new FieldArgumentBind(parsingTarget, info.Name);
                 }
             }
@@ -267,6 +272,33 @@ namespace CommandLineParser
             foreach (object certificationAttr in typeAttrs)
             {
                 Certifications.Add(((ArgumentCertificationAttribute)certificationAttr).Certification);
+            }
+        }
+
+        private static void InitializeLazyArgument(MemberInfo info, ArgumentAttribute argumentAttribute)
+        {
+            var attributeType = argumentAttribute.GetType();
+            var lazyArgument = (LazyArgument)argumentAttribute.Argument;
+            Type valueType;
+            if (argumentAttribute.AllowMultiple && typeof(IValueArgument).IsAssignableFrom(lazyArgument.GenericArgumentType))
+            {
+                var collectionType = info.GetMemberType();
+                valueType = collectionType.GetGenericArguments().First();
+            }
+            else
+            {
+                valueType = info.GetMemberType();
+            }
+            var properUnderlyingArgument = lazyArgument.GenericArgumentType.MakeGenericType(valueType);
+            foreach (var prop in typeof(ArgumentAttribute).GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.CanWrite))
+            {
+                var val = TypeExtensions.GetPropertyValue<object>(typeof(ArgumentAttribute), prop.Name, argumentAttribute);
+                lazyArgument.PropertyValues[prop.Name] = val;
+            }
+            argumentAttribute.CreateUnderlyingArgumentType(properUnderlyingArgument, lazyArgument.ConstructorParams);
+            foreach (var attributeProp in lazyArgument.PropertyValues)
+            {
+                TypeExtensions.SetPropertyValue(attributeType, attributeProp.Key, argumentAttribute, attributeProp.Value);
             }
         }
 
@@ -394,7 +426,7 @@ namespace CommandLineParser
                 }
                 AdditionalArgumentsSettings.ProcessArguments();
             }
-            else if(i < argsList.Count)
+            else if (i < argsList.Count)
             {
                 // only throw when there are any additional arguments
                 throw new CommandLineFormatException(
@@ -448,7 +480,7 @@ namespace CommandLineParser
                     }
                 }
             }
-        }        
+        }
 
         private void ExpandValueArgumentsWithEqualSigns(IList<string> argsList)
         {
@@ -457,7 +489,7 @@ namespace CommandLineParser
                 for (int i = 0; i < argsList.Count; i++)
                 {
                     string arg = argsList[i];
-				
+
                     Regex r = new Regex("([^=]*)=(.*)");
                     if (AcceptEqualSignSyntaxForValueArguments && r.IsMatch(arg))
                     {
@@ -489,7 +521,7 @@ namespace CommandLineParser
                                     {
                                         argsList.Insert(i, singleValue);
                                         i++;
-                                    }                                    
+                                    }
                                 }
                                 i--;
                             }
@@ -498,7 +530,7 @@ namespace CommandLineParser
                                 argsList.Insert(i, argNameWithSep);
                                 i++;
                                 argsList.Insert(i, argValue);
-                            }                            
+                            }
                         }
                     }
                 }
@@ -523,7 +555,7 @@ namespace CommandLineParser
             // argument not found anywhere
             return null;
         }
-        
+
         /// <summary>
         /// <para>
         /// Fills FullDescription of all the difined arguments from a resource file. 
@@ -564,7 +596,7 @@ namespace CommandLineParser
             _lookupDictionary.Clear();
             _ignoreCaseLookupDirectory.Clear();
         }
-            
+
         #region delegated to output formatter 
 
         /// <summary>
