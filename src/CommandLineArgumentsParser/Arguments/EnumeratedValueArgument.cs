@@ -87,7 +87,6 @@ namespace CommandLineParser.Arguments
             AllowedValues = typedValues;
         }
 
-
         /// <summary>
         /// Checks whether the specified value belongs to 
         /// the set of <see cref="AllowedValues">allowed values</see>. 
@@ -162,6 +161,7 @@ namespace CommandLineParser.Arguments
             ((LazyArgument)Argument).GenericArgumentType = typeof(EnumeratedValueArgument<>);
         }
 
+        private string allowedValues;
         /// <summary>
         /// Allowed values of the argument, separated by commas or semicolons.
         /// </summary>
@@ -169,11 +169,19 @@ namespace CommandLineParser.Arguments
         {
             get
             {
-                return string.Empty;
+                return allowedValues;
             }
             set
             {
-                _underlyingArgumentType.InvokeMethod("InitAllowedValues", Argument, value);
+                allowedValues = value;
+                if (Argument is LazyArgument)
+                {
+                    _underlyingArgumentType.SetPropertyValue("AllowedValues", Argument, value);
+                }
+                else
+                {
+                    _underlyingArgumentType.InvokeMethod("InitAllowedValues", Argument, value);
+                }
             }
         }
 

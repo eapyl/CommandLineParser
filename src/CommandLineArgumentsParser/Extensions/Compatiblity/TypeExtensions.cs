@@ -64,6 +64,10 @@ namespace CommandLineParser.Compatiblity
 
         public static void InvokeMethod<T>(this Type type, string methodName, object target, T value)
         {
+            if (target is Arguments.LazyArgument)
+            {
+                throw new InvalidOperationException("Not supported on LazyArgument");
+            }
 #if (!(NET40 || NET35 || NET20))
             MethodInfo method = GetMember(type.GetTypeInfo(), methodName, (ti, n) => ti.GetDeclaredMethod(n)); 
             method.Invoke(target, new object[] { value });
